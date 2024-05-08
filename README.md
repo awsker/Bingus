@@ -1,6 +1,8 @@
 # Bingus
 This application makes running, administrating, spectating and streaming bingo matches easier. It's a stripped-down version of my [EldenBingo](https://github.com/awsker/EldenBingo) application, with all Elden Ring specific functionality removed. It's built on .NET 6.0, so requires that the [runtimes](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-6.0.19-windows-x64-installer) are installed.
 
+![image](https://github.com/awsker/Bingus/assets/604653/fe736d5b-93ee-4629-b99a-5e0097d81f6e)
+
 # Overview of Features
 * Host a server capable of running multiple bingo races at once
 * Create bingo lobbies with optional administrator password and upload your own bingo .json file
