@@ -39,7 +39,7 @@ When joining (or creating) a lobby, you will be asked to input a nickname and se
 When creating a lobby you can enter any Room name you want, or use the one that was generated. If you enter an admin password, any player that connects to the lobby with that same admin password also becomes an administrator. If you leave it empty, only you will be able to administrate.
 
 You can also configure the rules of the lobby:  
-![Lobby settings](https://github.com/awsker/EldenBingo/assets/604653/e257606b-3db2-46b9-8b2e-211a2cedaecd)
+![Lobby settings](https://github.com/awsker/Bingus/assets/604653/e257606b-3db2-46b9-8b2e-211a2cedaecd)
 
 * *Board size* specifies how large the bingo board will be. This takes effect the next time a board is generated.  
 * *Random seed* will ensure that the same sequence of boards and random classes are generated/picked. This sequence will reset when a new json is uploaded. **0 means a random seed will be used**.  
@@ -66,7 +66,7 @@ The application will try to detect a running instance of EldenRing.exe. You can 
 
 ## Drawing on the map
 You can use the right mouse button to draw on the map. This is meant for live streaming, and is completely client side at the moment.  
-![telestrator](https://github.com/awsker/EldenBingo/assets/604653/98aa472b-fffd-48d4-9420-aba1b8df25b4)
+![telestrator](https://github.com/awsker/Bingus/assets/604653/98aa472b-fffd-48d4-9420-aba1b8df25b4)
 
 ## Map Controls
 * Left Click - Pan the map (stops following players)
@@ -80,7 +80,7 @@ You can use the right mouse button to draw on the map. This is meant for live st
 
 ## Class choice display
 If you enable the setting "Show random classes in map", the available starting classes will be displayed in the Map Window when the match starts. This is useful if you're a streamer and want your viewers to be able to see the selection themselves. Just set up a scene in your streaming software that captures the map window (as a Game capture) and you're good to go. Clicking left mouse, pressing Space or Escape will close the classes display.  
-![random classes](https://github.com/awsker/EldenBingo/assets/604653/562f384c-231e-42fd-8234-9715887b377d)
+![random classes](https://github.com/awsker/Bingus/assets/604653/562f384c-231e-42fd-8234-9715887b377d)
 
 
 # Bingo board controls
@@ -97,10 +97,10 @@ The settings are mostly for the convenience of a streamer, to set up the UI comp
 
 # Json Format
 The format is the same as is used by Bingo Brawlers and BingoSync but with extensions for tooltips, categories and counters.  
-![image](https://github.com/awsker/EldenBingo/assets/604653/a560d869-6954-4db7-9218-f9c40b838909)
+![image](https://github.com/awsker/Bingus/assets/604653/a560d869-6954-4db7-9218-f9c40b838909)
 
 Use the **tooltip** key to define a tooltip when hovering that square:  
- ![image](https://github.com/awsker/EldenBingo/assets/604653/a5f97ed4-9454-462a-bd31-8b2de1e186f7)
+ ![image](https://github.com/awsker/Bingus/assets/604653/a5f97ed4-9454-462a-bd31-8b2de1e186f7)
 
 Use the **category** key to define a single category, or the **categories** key to define an array of categories. These categories can be used in conjunction with the lobby setting *Max square in same category* to ensure that at most that number of categories will be present in one bingo board, in order to generate more balanced bingo boards.
 
