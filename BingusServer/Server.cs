@@ -20,7 +20,7 @@ namespace BingusServer
 
         public Server(int port) : base(port)
         {
-            _rooms = new ConcurrentDictionary<string, ServerRoom>();
+            _rooms = new ConcurrentDictionary<string, ServerRoom>(StringComparer.OrdinalIgnoreCase);
             //Always register the BingusCommon assembly
             RegisterAssembly(Assembly.GetAssembly(typeof(BingoBoard)));
             registerHandlers();
