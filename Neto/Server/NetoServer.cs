@@ -274,11 +274,16 @@ namespace Neto.Server
                             {
                                 if(_cachedIdentities.TryGetValue(ipToken, out var identity))
                                 {
-                                    client.ClientGuid = identity.ClientGuid;
-                                } 
+                                    //Unless there's a client already connected with this guid
+                                    if (!clientAlreadyExists(identity.ClientGuid))
+                                    {
+                                        client.ClientGuid = identity.ClientGuid;
+                                    }
+                                }
                                 else
                                 {
-                                    _cachedIdentities[ipToken] = new ClientIdentity(objData.IdentityToken, client.ClientGuid);
+                                    //Client not registered, register client with its currently assigned guid
+                                    _cachedIdentities[ipToken] = new ClientIdentity(ipToken, client.ClientGuid);
                                 }
                             }
                         }
@@ -296,6 +301,11 @@ namespace Neto.Server
                     DispatchObjectsInPacket(client, packet);
                     break;
             }
+        }
+
+        private bool clientAlreadyExists(Guid guid)
+        {
+            return _clients.Any(g => g.ClientGuid == guid);
         }
 
         private string clientToken(TcpClient client, string token)
