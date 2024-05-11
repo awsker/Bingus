@@ -394,5 +394,17 @@ namespace Bingus.Properties {
                 this["GS_ShowPlayerTeam"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string IdentityToken {
+            get {
+                return ((string)(this["IdentityToken"]));
+            }
+            set {
+                this["IdentityToken"] = value;
+            }
+        }
     }
 }
