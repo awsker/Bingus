@@ -12,6 +12,7 @@ namespace Neto.Server
         private readonly ConcurrentBag<CM> _clients;
         private readonly ConcurrentBag<TcpListener> _tcpListeners;
         private readonly ConstructorInfo _clientModelConstructor;
+        private readonly ConcurrentDictionary<string, ClientIdentity> _cachedIdentities;
         private CancellationTokenSource _cancelToken;
 
         public NetoServer(int port) : base()
@@ -22,12 +23,13 @@ namespace Neto.Server
             _tcpListeners = new ConcurrentBag<TcpListener>();
             _clients = new ConcurrentBag<CM>();
             _cancelToken = new CancellationTokenSource();
-
             var clientModelConstructor = typeof(CM).GetConstructor(new[] { typeof(TcpClient) });
             if (clientModelConstructor == null)
                 throw new ApplicationException("No constructor with TcpClient as argument was found");
             else
                 _clientModelConstructor = clientModelConstructor;
+
+            _cachedIdentities = new ConcurrentDictionary<string, ClientIdentity>();
         }
 
         ~NetoServer()
@@ -264,6 +266,22 @@ namespace Neto.Server
                     if (!client.IsRegistered)
                     {
                         client.IsRegistered = true;
+                        if(!string.IsNullOrEmpty(objData.IdentityToken))
+                        {
+                            var ipToken = clientToken(client.TcpClient, objData.IdentityToken);
+                            
+                            if(!string.IsNullOrEmpty(ipToken))
+                            {
+                                if(_cachedIdentities.TryGetValue(ipToken, out var identity))
+                                {
+                                    client.ClientGuid = identity.ClientGuid;
+                                } 
+                                else
+                                {
+                                    _cachedIdentities[ipToken] = new ClientIdentity(objData.IdentityToken, client.ClientGuid);
+                                }
+                            }
+                        }
                         var acceptPacket = new Packet(PacketTypes.ServerRegisterAccepted, new ServerRegisterAccepted(NetConstants.ServerRegisterString, client.ClientGuid));
                         await SendPacketToClient(acceptPacket, client);
                         fireOnClientConnected(client);
@@ -278,6 +296,15 @@ namespace Neto.Server
                     DispatchObjectsInPacket(client, packet);
                     break;
             }
+        }
+
+        private string clientToken(TcpClient client, string token)
+        {
+            if(client.Client?.RemoteEndPoint is IPEndPoint ip)
+            {
+                return ip.Address.ToString() + ":" + token;
+            }
+            return string.Empty;
         }
 
         private async void runTcpListener(IPAddress ip)

@@ -272,21 +272,21 @@ namespace Bingus
                 return;
             BeginInvoke(hideLobbyTab);
             updateButtonAvailability();
-            BeginInvoke(() =>
-            {
-                _consoleControl.PrintToConsole(e.Message, Color.Red);
-                _clientStatusTextBox.Text = _client.GetConnectionStatusString();
-            });
+            _consoleControl.PrintToConsole(e.Message, Color.Red);
+            updateStatusString();
             if (_autoReconnect && !string.IsNullOrWhiteSpace(Properties.Settings.Default.ServerAddress))
             {
                 await connect(Properties.Settings.Default.ServerAddress, Properties.Settings.Default.Port);
-            }
+            } 
             _autoReconnect = false;
+            
         }
 
-        private void client_Kicked(object? sender, EventArgs e)
+        private void client_Kicked(object? sender, StringEventArgs e)
         {
+            _consoleControl.PrintToConsole(e.Message, Color.Red);
             _autoReconnect = false; //So we don't reconnect automatically after kick
+            _connecting = false;
         }
 
         private void joinRoomAccepted(ClientModel? _, ServerJoinRoomAccepted joinRoomAcceptedArgs)
@@ -346,6 +346,22 @@ namespace Bingus
             update();
         }
 
+        private void updateStatusString()
+        {
+            if (_client == null)
+                return;
+            void update()
+            {
+                _clientStatusTextBox.Text = _client.GetConnectionStatusString();
+            };
+            if (InvokeRequired)
+            {
+                BeginInvoke(update);
+                return;
+            }
+            update();
+        }
+
         private void client_RoomChanged(object? sender, RoomChangedEventArgs e)
         {
             if (_client == null)
@@ -361,7 +377,7 @@ namespace Bingus
                 {
                     hideLobbyTab();
                 }
-                _clientStatusTextBox.Text = _client.GetConnectionStatusString();
+                updateStatusString();
             }
             if (InvokeRequired)
             {
@@ -375,11 +391,8 @@ namespace Bingus
         {
             if (FormReady)
             {
-                BeginInvoke(new Action(() =>
-                {
-                    _consoleControl.PrintToConsole(e.Message, Color.LightBlue);
-                    _clientStatusTextBox.Text = _client.GetConnectionStatusString();
-                }));
+                _consoleControl.PrintToConsole(e.Message, Color.LightBlue);
+                updateStatusString();
             }
         }
 
@@ -387,11 +400,8 @@ namespace Bingus
         {
             if (FormReady)
             {
-                BeginInvoke(new Action(() =>
-                {
-                    _consoleControl.PrintToConsole(e.Message, Color.Red);
-                    _clientStatusTextBox.Text = _client.GetConnectionStatusString();
-                }));
+                _consoleControl.PrintToConsole(e.Message, Color.Red);
+                updateStatusString();
             }
         }
 
@@ -482,7 +492,7 @@ namespace Bingus
             updateButtonAvailability();
 
             //Set the initial status of the status text box
-            _clientStatusTextBox.Text = _client.GetConnectionStatusString();
+            updateStatusString();
 
             if (Properties.Settings.Default.AutoConnect && !string.IsNullOrWhiteSpace(Properties.Settings.Default.ServerAddress))
             {

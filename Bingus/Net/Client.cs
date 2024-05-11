@@ -10,7 +10,7 @@ namespace Bingus
     {
         private Room? _room;
 
-        public Client()
+        public Client() : base(Environment.UserName)
         {
             //Always register the BingusCommon assembly
             RegisterAssembly(Assembly.GetAssembly(typeof(BingoBoard)));
