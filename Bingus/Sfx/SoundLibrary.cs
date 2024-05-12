@@ -61,6 +61,26 @@
             }
         }
 
+        public void StopSound(SoundType type)
+        {
+            int i = (int)type;
+            try
+            {
+                if (i >= 0 && i < _sounds.Length)
+                {
+                    var s = _sounds[i];
+                    if (s != null)
+                    {
+                        s?.Stop();
+                    }
+                }
+            }
+            catch
+            {
+                //Ignore errors when trying to play sound
+            }
+        }
+
         public void Dispose()
         {
             foreach (var s in _sounds)
