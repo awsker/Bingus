@@ -15,6 +15,9 @@ namespace Neto.Server
         private readonly ConcurrentDictionary<string, ClientIdentity> _cachedIdentities;
         private CancellationTokenSource _cancelToken;
 
+        private System.Timers.Timer _keepAliveTimer;
+        private const float KeepAliveTime = 25f;
+
         public NetoServer(int port) : base()
         {
             Port = port;
@@ -30,6 +33,10 @@ namespace Neto.Server
                 _clientModelConstructor = clientModelConstructor;
 
             _cachedIdentities = new ConcurrentDictionary<string, ClientIdentity>();
+
+            _keepAliveTimer = new System.Timers.Timer(5000f);
+            _keepAliveTimer.Elapsed += keepAlive;
+            _keepAliveTimer.Start();
         }
 
         ~NetoServer()
@@ -375,6 +382,7 @@ namespace Neto.Server
                     else
                     {
                         client.MalformedPackets = Math.Max(0, client.MalformedPackets - 1);
+                        client.LastActivity = DateTime.Now;
                         await handleIncomingPacket(client, packet);
                     }
                 }
@@ -384,6 +392,19 @@ namespace Neto.Server
                 //Stream was closed, most likely due to the client shutting down
                 //but could also be because client sent malformed packet
                 await DropClient(client);
+            }
+        }
+
+        private void keepAlive(object? sender, EventArgs e)
+        {
+            var now = DateTime.Now;
+            foreach(var client in _clients)
+            {
+                if((now - client.LastActivity).TotalSeconds > KeepAliveTime)
+                {
+                    _ = SendPacketToClient(new Packet(PacketTypes.KeepAlive, new KeepAlive()), client);
+                    client.LastActivity = DateTime.Now;
+                }
             }
         }
     }
