@@ -50,6 +50,7 @@ namespace Bingus
                 Application.Exit();
             };
             _client = new Client();
+            _client.PacketDelayMs = Properties.Settings.Default.DelayMatchEvents;
             addClientListeners(_client);
             setupClickHotkey();
             listenToSettingsChanged();
@@ -425,6 +426,10 @@ namespace Bingus
             if (e.PropertyName == nameof(Properties.Settings.Default.ClickHotkey))
             {
                 setupClickHotkey();
+            }
+            if (e.PropertyName == nameof(Properties.Settings.Default.DelayMatchEvents) && _client != null)
+            {
+                _client.PacketDelayMs = Properties.Settings.Default.DelayMatchEvents;
             }
         }
 
