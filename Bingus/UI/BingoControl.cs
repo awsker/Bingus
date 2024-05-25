@@ -1,5 +1,4 @@
 ﻿using Bingus.Net;
-using Bingus.Util;
 using BingusCommon;
 using Neto.Shared;
 using System.Drawing.Drawing2D;
@@ -57,7 +56,8 @@ namespace Bingus.UI
             {
                 while(_gridControl.Controls.Count > targetSquares)
                 {
-                    _gridControl.Controls.RemoveAt(_gridControl.Controls.Count - 1);
+                    var lastIndex = _gridControl.Controls.Count - 1;
+                    _gridControl.Controls.RemoveAt(lastIndex);
                 }
             }
             else if(_size < size)
@@ -67,7 +67,6 @@ namespace Bingus.UI
                 {
                     var squareControl = new BingoSquareControl(i++, string.Empty, string.Empty);
                     squareControl.MouseDown += square_MouseDown;
-                    squareControl.MouseWheel += square_MouseWheel;
                     _gridControl.Controls.Add(squareControl);
                 }
             }
@@ -265,6 +264,40 @@ namespace Bingus.UI
             }
         }
 
+        private async void keyPressed(object? sender, KeyEventArgs e)
+        {
+            if (Squares == null)
+                return;
+
+            var key = Properties.Settings.Default.ClickHotkey;
+            if(key != 0 && e.KeyValue == key)
+            {
+                foreach (var square in Squares)
+                {
+                    if (square.MouseOver)
+                    {
+                        await clickSquare(square);
+                        return;
+                    }
+                }
+            }
+        }
+
+        private async void mouseWheel(object? sender, MouseEventArgs e)
+        {
+            if (Squares == null || e.Delta == 0)
+                return;
+
+            foreach (var square in Squares)
+            {
+                if (square.MouseOver)
+                {
+                    await changeSquareCounter(square, Math.Clamp(e.Delta, -1, 1));
+                    return;
+                }
+            }
+        }
+
         private void bingoControl_SizeChanged(object? sender, EventArgs e)
         {
             recalculateFontSizeForSquares();
@@ -300,9 +333,11 @@ namespace Bingus.UI
             var mainForm = MainForm.GetMainForm(this);
             if(mainForm != null)
             {
-                mainForm.KeyHandler.KeyPressed += hotkeyPressed;
+                mainForm.RawInput.KeyPressed += keyPressed;
+                mainForm.RawInput.MouseWheel += mouseWheel;
             }
         }
+
 
         private UserInRoom? getUserToSetFor()
         {
@@ -451,14 +486,10 @@ namespace Bingus.UI
 
         private async void square_MouseWheel(object? sender, MouseEventArgs e)
         {
-            if (sender is not BingoSquareControl c)
+            if (sender is not BingoSquareControl c || e.Delta == 0)
                 return;
 
-            if (e.Delta != 0)
-            {
-                var change = Math.Max(-1, Math.Min(1, e.Delta));
-                await changeSquareCounter(c, change);
-            }
+            await changeSquareCounter(c, Math.Clamp(e.Delta, -1, 1));
         }
 
         private async Task changeSquareCounter(BingoSquareControl c, int change)
