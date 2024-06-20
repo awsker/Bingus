@@ -250,20 +250,6 @@ namespace Bingus.UI
             setupClickHotkey();
         }
 
-        private async void hotkeyPressed(object? sender, EventArgs e)
-        {
-            if (Squares == null)
-                return;
-            foreach (var square in Squares)
-            {
-                if (square.MouseOver)
-                {
-                    await clickSquare(square);
-                    return;
-                }
-            }
-        }
-
         private async void keyPressed(object? sender, KeyEventArgs e)
         {
             if (Squares == null)
