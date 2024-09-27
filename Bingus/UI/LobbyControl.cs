@@ -64,6 +64,8 @@ namespace Bingus.UI
             Client.AddListener<ServerUserChat>(userChat);
             Client.AddListener<ServerBingoAchievedUpdate>(bingoAchieved);
             Client.AddListener<ServerTeamNameChanged>(teamNameChanged);
+
+            Client.AddListener<ServerBroadcastMessage>(serverMessage);
         }
 
         protected override void ClientChanged()
@@ -203,6 +205,10 @@ namespace Bingus.UI
             }
         }
 
+        private void serverMessage(ClientModel? model, ServerBroadcastMessage message)
+        {
+            updateMatchLog(new[] { $"Server: {message.Message}" }, new Color?[] { Color.Orange }, true);
+        }
 
         private void _scoreboardControl_SizeChanged(object sender, EventArgs e)
         {

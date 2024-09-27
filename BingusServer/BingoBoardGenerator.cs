@@ -1,5 +1,5 @@
 ﻿using BingusCommon;
-using System.Text.Json;
+using Newtonsoft.Json.Linq;
 
 namespace BingusServer
 {
@@ -11,48 +11,40 @@ namespace BingusServer
 
         public BingoBoardGenerator(string json, int randomSeed)
         {
-            var doc = JsonDocument.Parse(json);
-            if (doc.RootElement.ValueKind != JsonValueKind.Array)
+            var token = JToken.Parse(json);
+            if (token is not JArray squareArray)
             {
                 throw new ArgumentException("Json is not in the correct format", nameof(json));
             }
             RandomSeed = randomSeed;
             _list = new List<BingoJsonObj>();
-            foreach (var row in doc.RootElement.EnumerateArray())
+            foreach (var square in squareArray)
             {
-                var text = row.GetProperty("name").GetString();
-                if (text == null)
+                string? name = square.Value<string>("name");
+                if (string.IsNullOrWhiteSpace(name))
                     continue;
+                string? tooltip = square.Value<string>("tooltip");
+                int? count = square.Value<int?>("count");
+                int? weight = square.Value<int?>("weight");
+                string? category = square.Value<string>("category");
 
-                string? tooltip = null;
-                int count = 0;
-                int weight = 1;
                 var categories = new HashSet<string>();
-                if (row.TryGetProperty("tooltip", out var elem))
-                    tooltip = elem.GetString();
-                if (row.TryGetProperty("count", out elem))
-                    elem.TryGetInt32(out count);
-                if (row.TryGetProperty("weight", out elem))
-                    elem.TryGetInt32(out weight);
-                if (row.TryGetProperty("category", out elem))
+
+                if (category != null)
+                    categories.Add(category.Trim());
+
+                var categoryArray = square.Value<JArray>("categories");
+                if (categoryArray != null)
                 {
-                    var categoryName = elem.GetString();
-                    if (categoryName != null)
-                        categories.Add(categoryName);
-                }
-                if (row.TryGetProperty("categories", out elem))
-                {
-                    if (elem.GetArrayLength() > 0)
+                    foreach (var v in categoryArray.OfType<JValue>())
                     {
-                        foreach (var e in elem.EnumerateArray())
+                        if (v.Value is string c)
                         {
-                            string? categoryNameInner = e.GetString();
-                            if (categoryNameInner != null)
-                                categories.Add(categoryNameInner);
+                            categories.Add(c.Trim());
                         }
                     }
                 }
-                _list.Add(new BingoJsonObj(text, tooltip, count, weight, categories.ToArray()));
+                _list.Add(new BingoJsonObj(name, tooltip, count.GetValueOrDefault(0), weight.GetValueOrDefault(1), categories.ToArray()));
             }
         }
 
@@ -80,9 +72,10 @@ namespace BingusServer
             var categoryCount = new Dictionary<string, int>();
 
             var numSquares = room.GameSettings.BoardSize * room.GameSettings.BoardSize;
-            bool exceededCategoryLimit = false;
+            bool anySquareFailedCategoryLimit = false;
             while (squareQueue.Count > 0 && squares.Count < numSquares)
             {
+                bool thisSquareFailedCategoryCheck = false;
                 var potentialSquare = squareQueue.Dequeue();
                 if (CategoryLimit > 0)
                 {
@@ -90,10 +83,16 @@ namespace BingusServer
                     {
                         if (categoryCount.TryGetValue(category, out int count) && count + 1 > CategoryLimit)
                         {
-                            exceededCategoryLimit = true;
-                            continue; //Category limit would be exceeded with this square, so we skip it
+                            anySquareFailedCategoryLimit = true;
+                            thisSquareFailedCategoryCheck = true;
+                            break;
                         }
                     }
+                }
+                if (thisSquareFailedCategoryCheck)
+                {
+                    //Try next square instead
+                    continue;
                 }
                 //YES, include the square on the board
                 squares.Add(potentialSquare);
@@ -110,7 +109,7 @@ namespace BingusServer
             }
             //If category limit was exceeded by any square:
             //Shuffle the final squares, so we don't get a bias of category-less squares late in the board
-            if (exceededCategoryLimit)
+            if (anySquareFailedCategoryLimit)
                 squares = shuffleList(squares, _random).ToList();
             balanceBoard(squares);
 
@@ -127,16 +126,16 @@ namespace BingusServer
             }
             return new ServerBingoBoard(room,
                 room.GameSettings.BoardSize,
-                squares.Select(s => 
+                squares.Select(s =>
                     new BingoBoardSquare(
-                        s.Text, 
-                        s.Tooltip, 
-                        s.Count, 
-                        null, 
-                        false, 
+                        s.Text,
+                        s.Tooltip,
+                        s.Count,
+                        null,
+                        false,
                         Array.Empty<SquareCounter>()
                     )
-                ).ToArray(), 
+                ).ToArray(),
             classes);
         }
 

@@ -1,4 +1,5 @@
 ﻿using BingusCommon;
+using Newtonsoft.Json;
 using System.Collections.Concurrent;
 
 namespace BingusServer
@@ -7,15 +8,15 @@ namespace BingusServer
     {
         public CheckStatus()
         {
-            Time = DateTime.Now;
             Team = null;
             MarkedBy = new HashSet<Guid>();
             PlayerCounters = new ConcurrentDictionary<Guid, int>();
         }
-
+        [JsonProperty]
         public int? Team { get; set; }
-        public DateTime Time { get; init; }
+        [JsonProperty]
         private IDictionary<Guid, int> PlayerCounters { get; init; }
+        [JsonProperty]
         private ISet<Guid> MarkedBy { get; init; }
 
         public bool Check(int team)
@@ -66,7 +67,7 @@ namespace BingusServer
         public int? GetCounterByTeam(int team, IEnumerable<UserInRoom> players)
         {
             int? counter = null;
-            foreach(var player in players.Where(p => p.Team == team))
+            foreach (var player in players.Where(p => p.Team == team))
             {
                 var c = GetCounter(player);
                 if (c.HasValue)
@@ -96,11 +97,11 @@ namespace BingusServer
             {
                 var team = teams[i];
                 int? teamCount = null;
-                if(recipient.IsSpectator)
+                if (recipient.IsSpectator)
                 {
                     teamCount = GetCounterByTeam(team.Index, players);
-                } 
-                else if(recipient.Team == team.Index)
+                }
+                else if (recipient.Team == team.Index)
                 {
                     teamCount = GetCounter(recipient);
                 }
@@ -112,7 +113,7 @@ namespace BingusServer
 
     public class ServerBingoBoard : BingoBoard
     {
-        internal ServerBingoBoard(ServerRoom room, int size, BingoBoardSquare[] squares, EldenRingClasses[] availableClasses) : base(size, squares, availableClasses)
+        public ServerBingoBoard(ServerRoom room, int size, BingoBoardSquare[] squares, EldenRingClasses[] availableClasses) : base(size, squares, availableClasses)
         {
             var sizeSqr = size * size;
             CheckStatus = new CheckStatus[sizeSqr];
@@ -124,15 +125,20 @@ namespace BingusServer
             _lastBingos = new Dictionary<int, IList<BingoLine>>();
         }
 
+        [JsonProperty]
         public CheckStatus[] CheckStatus { get; init; }
-        internal ServerRoom Room { get; init; }
+        [JsonIgnore]
+        internal ServerRoom Room { get; set; }
+        [JsonProperty]
         private IDictionary<int, IList<BingoLine>> _lastBingos;
 
+        [JsonIgnore]
         public IDictionary<int, IList<BingoLine>> BingosPerTeam
         {
             get { return _lastBingos; }
         }
 
+        [JsonIgnore]
         public ISet<BingoLine> BingoSet
         {
             get { return new HashSet<BingoLine>(_lastBingos.Values.SelectMany(t => t)); }
@@ -210,7 +216,7 @@ namespace BingusServer
                 {
                     checkChanged = CheckStatus[i].Uncheck();
                 }
-                if(checkChanged)
+                if (checkChanged)
                 {
                     _lastBingos = Room.GetBingos();
                 }
@@ -243,7 +249,7 @@ namespace BingusServer
         public Dictionary<int, int> GetSquaresPerTeam()
         {
             var squaresCountPerTeam = new Dictionary<int, int>();
-            
+
             foreach (var square in CheckStatus)
             {
                 if (!square.Team.HasValue)
@@ -266,7 +272,7 @@ namespace BingusServer
         {
             var teamsDict = teams.ToDictionary(t => t.Index, t => t);
             var bingosPerTeam = new Dictionary<int, IList<BingoLine>>();
-            
+
             void findBingo(int startx, int starty, int dx, int dy)
             {
                 int index(int x, int y) { return x + y * Size; }

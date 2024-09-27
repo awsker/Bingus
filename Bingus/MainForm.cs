@@ -39,11 +39,14 @@ namespace Bingus
                 AutoScaleMode = prev;
             }
 
-            FormClosing += (o, e) =>
+            FormClosing += async (o, e) =>
             {
                 _autoReconnect = false;
                 _sounds.Dispose();
                 _client?.Disconnect();
+                //Stop server and serialize rooms
+                if (_server != null)
+                    await _server.Stop();
                 Properties.Settings.Default.Save();
                 Application.Exit();
             };
@@ -52,8 +55,10 @@ namespace Bingus
             addClientListeners(_client);
             listenToSettingsChanged();
             SizeChanged += mainForm_SizeChanged;
+            Instance = this;
         }
 
+        public static MainForm? Instance { get; private set; }
         public RawInputHandler RawInput => _rawInput;
 
         public static Font GetFontFromSettings(Font defaultFont, float size, float defaultSize = 12f)
@@ -86,6 +91,11 @@ namespace Bingus
                 parent = parent.Parent;
             }
             return parent as MainForm;
+        }
+
+        public void PrintToConsole(string text, Color color, bool timestamp = true)
+        {
+            _consoleControl.PrintToConsole(text, color, timestamp);
         }
 
         protected override void WndProc(ref Message m)
@@ -135,7 +145,7 @@ namespace Bingus
             }
             try
             {
-                var connectRetries = 5;
+                var connectRetries = 500;
                 while (_connecting && connectRetries > 0)
                 {
                     try
@@ -264,6 +274,7 @@ namespace Bingus
             client.AddListener<ServerJoinRoomDenied>(joinRoomDenied);
             client.AddListener<ServerUserChecked>(userCheckedSquare);
             client.AddListener<ServerBingoAchievedUpdate>(bingoAchieved);
+            client.AddListener<ServerBroadcastMessage>(onServerMessage);
         }
 
         private void client_Connected(object? sender, EventArgs e)
@@ -285,8 +296,6 @@ namespace Bingus
             {
                 await connect(Properties.Settings.Default.ServerAddress, Properties.Settings.Default.Port);
             } 
-            _autoReconnect = false;
-            
         }
 
         private void client_Kicked(object? sender, StringEventArgs e)
@@ -320,6 +329,11 @@ namespace Bingus
             {
                 _sounds.PlaySound(SoundType.Bingo);
             }
+        }
+
+        private void onServerMessage(ClientModel? model, ServerBroadcastMessage message)
+        {
+            _consoleControl.PrintToConsole("Server: " + message.Message, Color.Orange);
         }
 
         private void showLobbyTab()
@@ -439,7 +453,15 @@ namespace Bingus
         {
             if (_server == null)
             {
-                _server = new Server(Properties.Settings.Default.Port);
+                string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                string appSpecificFolder = Path.Combine(appDataFolder, Application.ProductName);
+
+                if (!Directory.Exists(appSpecificFolder))
+                {
+                    Directory.CreateDirectory(appSpecificFolder);
+                }
+                string jsonFile = Path.Combine(appSpecificFolder, "serverData.json");
+                _server = new Server(Properties.Settings.Default.Port, jsonFile);
                 _server.OnStatus += server_OnStatus;
                 _server.OnError += server_OnError;
                 _server.Host();
