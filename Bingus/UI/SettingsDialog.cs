@@ -119,8 +119,6 @@
             Properties.Settings.Default.BingoBoardMaximumSize = _bingoCustomMaxSizeRadioButton.Checked;
             Properties.Settings.Default.BingoMaxSizeX = x;
             Properties.Settings.Default.BingoMaxSizeY = y;
-            Properties.Settings.Default.Port = port;
-            Properties.Settings.Default.DelayMatchEvents = delayMatchEvents;
 
             Properties.Settings.Default.ControlBackColor = _colorPanel.BackColor;
 
@@ -128,9 +126,9 @@
             Properties.Settings.Default.BingoFontStyle = (int)_fontLinkLabel.Font.Style;
             Properties.Settings.Default.BingoFontSize = _fontLinkLabel.Font.Size;
 
+            Properties.Settings.Default.Port = port;
             Properties.Settings.Default.HostServerOnLaunch = _hostServerCheckBox.Checked;
             
-
             Properties.Settings.Default.ClickIncrementsCountedSquares = _clickIncrementsCountCheckbox.Checked;
 
             Properties.Settings.Default.PlaySounds = _soundCheckBox.Checked;
@@ -139,7 +137,9 @@
             Properties.Settings.Default.ClickHotkey = (int)_outOfFocusKey;
 
             Properties.Settings.Default.AlwaysOnTop = _alwaysOnTopCheckbox.Checked;
-            
+
+            Properties.Settings.Default.DelayMatchEvents = delayMatchEvents;
+
             Properties.Settings.Default.Save();
             return true;
         }
