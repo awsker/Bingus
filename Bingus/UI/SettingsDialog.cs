@@ -96,42 +96,31 @@
 
         private bool saveSettings()
         {
-            Properties.Settings.Default.BingoBoardMaximumSize = _bingoCustomMaxSizeRadioButton.Checked;
-            if (int.TryParse(_bingoMaxXTextBox.Text, out var x))
-            {
-                Properties.Settings.Default.BingoMaxSizeX = x;
-            }
-            else
+            if (!int.TryParse(_bingoMaxXTextBox.Text, out var x))
             {
                 //Invalid x size
                 return false;
             }
-            if (int.TryParse(_bingoMaxYTextBox.Text, out var y))
-            {
-                Properties.Settings.Default.BingoMaxSizeY = y;
-            }
-            else
+            if (!int.TryParse(_bingoMaxYTextBox.Text, out var y))
             {
                 //Invalid y size
-                return false;
+                return false; 
             }
-            if (int.TryParse(_portTextBox.Text, out int port))
-            {
-                Properties.Settings.Default.Port = port;
-            }
-            else
+            if (!int.TryParse(_portTextBox.Text, out int port))
             {
                 //Invalid port
                 return false;
             }
-            if (int.TryParse(_delayMatchEventsTextBox.Text, out int delayMatchEvents))
+            if (!int.TryParse(_delayMatchEventsTextBox.Text, out int delayMatchEvents))
             {
-                Properties.Settings.Default.DelayMatchEvents = delayMatchEvents;
-            }
-            else
-            {
+                //Invalid event delay
                 return false;
             }
+            Properties.Settings.Default.BingoBoardMaximumSize = _bingoCustomMaxSizeRadioButton.Checked;
+            Properties.Settings.Default.BingoMaxSizeX = x;
+            Properties.Settings.Default.BingoMaxSizeY = y;
+            Properties.Settings.Default.Port = port;
+            Properties.Settings.Default.DelayMatchEvents = delayMatchEvents;
 
             Properties.Settings.Default.ControlBackColor = _colorPanel.BackColor;
 
