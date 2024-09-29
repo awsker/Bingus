@@ -115,14 +115,6 @@
                 //Invalid y size
                 return false;
             }
-
-            Properties.Settings.Default.ControlBackColor = _colorPanel.BackColor;
-
-            Properties.Settings.Default.BingoFont = _fontLinkLabel.Font.FontFamily.Name;
-            Properties.Settings.Default.BingoFontStyle = (int)_fontLinkLabel.Font.Style;
-            Properties.Settings.Default.BingoFontSize = _fontLinkLabel.Font.Size;
-
-            Properties.Settings.Default.HostServerOnLaunch = _hostServerCheckBox.Checked;
             if (int.TryParse(_portTextBox.Text, out int port))
             {
                 Properties.Settings.Default.Port = port;
@@ -132,6 +124,23 @@
                 //Invalid port
                 return false;
             }
+            if (int.TryParse(_delayMatchEventsTextBox.Text, out int delayMatchEvents))
+            {
+                Properties.Settings.Default.DelayMatchEvents = delayMatchEvents;
+            }
+            else
+            {
+                return false;
+            }
+
+            Properties.Settings.Default.ControlBackColor = _colorPanel.BackColor;
+
+            Properties.Settings.Default.BingoFont = _fontLinkLabel.Font.FontFamily.Name;
+            Properties.Settings.Default.BingoFontStyle = (int)_fontLinkLabel.Font.Style;
+            Properties.Settings.Default.BingoFontSize = _fontLinkLabel.Font.Size;
+
+            Properties.Settings.Default.HostServerOnLaunch = _hostServerCheckBox.Checked;
+            
 
             Properties.Settings.Default.ClickIncrementsCountedSquares = _clickIncrementsCountCheckbox.Checked;
 
@@ -141,16 +150,7 @@
             Properties.Settings.Default.ClickHotkey = (int)_outOfFocusKey;
 
             Properties.Settings.Default.AlwaysOnTop = _alwaysOnTopCheckbox.Checked;
-
-            if (int.TryParse(_delayMatchEventsTextBox.Text, out int delayMatchEvents)) 
-            {
-                Properties.Settings.Default.DelayMatchEvents = delayMatchEvents;
-            } 
-            else
-            {
-                return false;
-            }
-
+            
             Properties.Settings.Default.Save();
             return true;
         }
