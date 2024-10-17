@@ -52,11 +52,16 @@
             _fontLinkLabel = new LinkLabel();
             label8 = new Label();
             tabPage1 = new TabPage();
+            groupBox4 = new GroupBox();
+            _checkUpdatesCheckBox = new CheckBox();
             groupBox3 = new GroupBox();
             _alwaysOnTopCheckbox = new CheckBox();
             _colorPanel = new Panel();
             label5 = new Label();
             groupBox8 = new GroupBox();
+            _testSoundButton = new Button();
+            _soundOutputDeviceComboBox = new ComboBox();
+            label6 = new Label();
             label10 = new Label();
             _volumeTrackBar = new TrackBar();
             _soundCheckBox = new CheckBox();
@@ -72,6 +77,7 @@
             groupBox2.SuspendLayout();
             groupBox7.SuspendLayout();
             tabPage1.SuspendLayout();
+            groupBox4.SuspendLayout();
             groupBox3.SuspendLayout();
             groupBox8.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)_volumeTrackBar).BeginInit();
@@ -131,7 +137,7 @@
             groupBox1.Location = new Point(254, 6);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(240, 107);
-            groupBox1.TabIndex = 18;
+            groupBox1.TabIndex = 31;
             groupBox1.TabStop = false;
             groupBox1.Text = "Spectator Settings";
             // 
@@ -151,7 +157,7 @@
             label2.Location = new Point(90, 6);
             label2.Name = "label2";
             label2.Size = new Size(73, 15);
-            label2.TabIndex = 21;
+            label2.TabIndex = 34;
             label2.Text = "milliseconds";
             // 
             // _delayMatchEventsTextBox
@@ -160,7 +166,7 @@
             _delayMatchEventsTextBox.MaximumSize = new Size(100, 0);
             _delayMatchEventsTextBox.Name = "_delayMatchEventsTextBox";
             _delayMatchEventsTextBox.Size = new Size(81, 23);
-            _delayMatchEventsTextBox.TabIndex = 20;
+            _delayMatchEventsTextBox.TabIndex = 33;
             // 
             // label1
             // 
@@ -169,7 +175,7 @@
             label1.Name = "label1";
             label1.Padding = new Padding(0, 3, 0, 0);
             label1.Size = new Size(234, 55);
-            label1.TabIndex = 19;
+            label1.TabIndex = 32;
             label1.Text = "When spectating, delay all match events (this includes square checks, counters, match status changes, timer etc.):";
             // 
             // groupBox2
@@ -183,7 +189,7 @@
             groupBox2.Location = new Point(8, 6);
             groupBox2.Name = "groupBox2";
             groupBox2.Size = new Size(240, 107);
-            groupBox2.TabIndex = 7;
+            groupBox2.TabIndex = 18;
             groupBox2.TabStop = false;
             groupBox2.Text = "Bingo Board Max Size";
             // 
@@ -192,7 +198,7 @@
             _bingoMaxYTextBox.Location = new Point(117, 72);
             _bingoMaxYTextBox.Name = "_bingoMaxYTextBox";
             _bingoMaxYTextBox.Size = new Size(54, 23);
-            _bingoMaxYTextBox.TabIndex = 11;
+            _bingoMaxYTextBox.TabIndex = 24;
             // 
             // label3
             // 
@@ -200,7 +206,7 @@
             label3.Location = new Point(94, 75);
             label3.Name = "label3";
             label3.Size = new Size(17, 15);
-            label3.TabIndex = 11;
+            label3.TabIndex = 23;
             label3.Text = "Y:";
             // 
             // _bingoCustomMaxSizeRadioButton
@@ -209,7 +215,7 @@
             _bingoCustomMaxSizeRadioButton.Location = new Point(9, 46);
             _bingoCustomMaxSizeRadioButton.Name = "_bingoCustomMaxSizeRadioButton";
             _bingoCustomMaxSizeRadioButton.Size = new Size(116, 19);
-            _bingoCustomMaxSizeRadioButton.TabIndex = 9;
+            _bingoCustomMaxSizeRadioButton.TabIndex = 20;
             _bingoCustomMaxSizeRadioButton.TabStop = true;
             _bingoCustomMaxSizeRadioButton.Text = "Custom Max Size";
             _bingoCustomMaxSizeRadioButton.UseVisualStyleBackColor = false;
@@ -220,7 +226,7 @@
             _bingoNoMaxSizeRadioButton.Location = new Point(9, 22);
             _bingoNoMaxSizeRadioButton.Name = "_bingoNoMaxSizeRadioButton";
             _bingoNoMaxSizeRadioButton.Size = new Size(122, 19);
-            _bingoNoMaxSizeRadioButton.TabIndex = 8;
+            _bingoNoMaxSizeRadioButton.TabIndex = 19;
             _bingoNoMaxSizeRadioButton.TabStop = true;
             _bingoNoMaxSizeRadioButton.Text = "No Maximum Size";
             _bingoNoMaxSizeRadioButton.UseVisualStyleBackColor = true;
@@ -230,7 +236,7 @@
             _bingoMaxXTextBox.Location = new Point(30, 72);
             _bingoMaxXTextBox.Name = "_bingoMaxXTextBox";
             _bingoMaxXTextBox.Size = new Size(54, 23);
-            _bingoMaxXTextBox.TabIndex = 10;
+            _bingoMaxXTextBox.TabIndex = 22;
             // 
             // label4
             // 
@@ -238,7 +244,7 @@
             label4.Location = new Point(7, 75);
             label4.Name = "label4";
             label4.Size = new Size(17, 15);
-            label4.TabIndex = 7;
+            label4.TabIndex = 21;
             label4.Text = "X:";
             // 
             // groupBox7
@@ -251,7 +257,7 @@
             groupBox7.Location = new Point(8, 119);
             groupBox7.Name = "groupBox7";
             groupBox7.Size = new Size(240, 195);
-            groupBox7.TabIndex = 12;
+            groupBox7.TabIndex = 25;
             groupBox7.TabStop = false;
             groupBox7.Text = "Appearance";
             // 
@@ -261,7 +267,7 @@
             _outOfFocusClickTextBox.Name = "_outOfFocusClickTextBox";
             _outOfFocusClickTextBox.ReadOnly = true;
             _outOfFocusClickTextBox.Size = new Size(105, 23);
-            _outOfFocusClickTextBox.TabIndex = 17;
+            _outOfFocusClickTextBox.TabIndex = 30;
             _outOfFocusClickTextBox.Enter += _outOfFocusClickTextBox_Enter;
             _outOfFocusClickTextBox.KeyDown += _outOfFocusClickTextBox_KeyDown;
             _outOfFocusClickTextBox.Leave += _outOfFocusClickTextBox_Leave;
@@ -272,7 +278,7 @@
             label11.Location = new Point(9, 134);
             label11.Name = "label11";
             label11.Size = new Size(186, 15);
-            label11.TabIndex = 16;
+            label11.TabIndex = 29;
             label11.Text = "Out-of-focus click key (Keyboard)";
             // 
             // _clickIncrementsCountCheckbox
@@ -280,7 +286,7 @@
             _clickIncrementsCountCheckbox.Location = new Point(9, 71);
             _clickIncrementsCountCheckbox.Name = "_clickIncrementsCountCheckbox";
             _clickIncrementsCountCheckbox.Size = new Size(219, 54);
-            _clickIncrementsCountCheckbox.TabIndex = 15;
+            _clickIncrementsCountCheckbox.TabIndex = 28;
             _clickIncrementsCountCheckbox.Text = "Clicking on \"Counted\" square increments the counter instead of marking the square";
             _clickIncrementsCountCheckbox.UseVisualStyleBackColor = true;
             // 
@@ -291,7 +297,7 @@
             _fontLinkLabel.Location = new Point(8, 43);
             _fontLinkLabel.Name = "_fontLinkLabel";
             _fontLinkLabel.Size = new Size(90, 20);
-            _fontLinkLabel.TabIndex = 14;
+            _fontLinkLabel.TabIndex = 27;
             _fontLinkLabel.TabStop = true;
             _fontLinkLabel.Text = "FontName";
             _fontLinkLabel.LinkClicked += _fontLinkLabel_LinkClicked;
@@ -302,12 +308,13 @@
             label8.Location = new Point(8, 23);
             label8.Name = "label8";
             label8.Size = new Size(80, 15);
-            label8.TabIndex = 13;
+            label8.TabIndex = 26;
             label8.Text = "Font and Size:";
             // 
             // tabPage1
             // 
             tabPage1.BackColor = SystemColors.Control;
+            tabPage1.Controls.Add(groupBox4);
             tabPage1.Controls.Add(groupBox3);
             tabPage1.Controls.Add(groupBox8);
             tabPage1.Controls.Add(groupBox5);
@@ -317,6 +324,26 @@
             tabPage1.Size = new Size(513, 348);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "General";
+            // 
+            // groupBox4
+            // 
+            groupBox4.Controls.Add(_checkUpdatesCheckBox);
+            groupBox4.Location = new Point(254, 102);
+            groupBox4.Name = "groupBox4";
+            groupBox4.Size = new Size(240, 59);
+            groupBox4.TabIndex = 16;
+            groupBox4.TabStop = false;
+            groupBox4.Text = "Application Updates";
+            // 
+            // _checkUpdatesCheckBox
+            // 
+            _checkUpdatesCheckBox.AutoSize = true;
+            _checkUpdatesCheckBox.Location = new Point(12, 26);
+            _checkUpdatesCheckBox.Name = "_checkUpdatesCheckBox";
+            _checkUpdatesCheckBox.Size = new Size(179, 19);
+            _checkUpdatesCheckBox.TabIndex = 17;
+            _checkUpdatesCheckBox.Text = "Check for updates on startup";
+            _checkUpdatesCheckBox.UseVisualStyleBackColor = true;
             // 
             // groupBox3
             // 
@@ -336,7 +363,7 @@
             _alwaysOnTopCheckbox.Location = new Point(12, 58);
             _alwaysOnTopCheckbox.Name = "_alwaysOnTopCheckbox";
             _alwaysOnTopCheckbox.Size = new Size(102, 19);
-            _alwaysOnTopCheckbox.TabIndex = 3;
+            _alwaysOnTopCheckbox.TabIndex = 4;
             _alwaysOnTopCheckbox.Text = "Always on Top";
             _alwaysOnTopCheckbox.UseVisualStyleBackColor = true;
             // 
@@ -346,7 +373,7 @@
             _colorPanel.Location = new Point(168, 22);
             _colorPanel.Name = "_colorPanel";
             _colorPanel.Size = new Size(25, 25);
-            _colorPanel.TabIndex = 35;
+            _colorPanel.TabIndex = 3;
             _colorPanel.Click += _colorPanel_Click;
             // 
             // label5
@@ -360,15 +387,46 @@
             // 
             // groupBox8
             // 
+            groupBox8.Controls.Add(_testSoundButton);
+            groupBox8.Controls.Add(_soundOutputDeviceComboBox);
+            groupBox8.Controls.Add(label6);
             groupBox8.Controls.Add(label10);
             groupBox8.Controls.Add(_volumeTrackBar);
             groupBox8.Controls.Add(_soundCheckBox);
             groupBox8.Location = new Point(8, 102);
             groupBox8.Name = "groupBox8";
-            groupBox8.Size = new Size(240, 121);
-            groupBox8.TabIndex = 4;
+            groupBox8.Size = new Size(240, 198);
+            groupBox8.TabIndex = 5;
             groupBox8.TabStop = false;
             groupBox8.Text = "Sounds";
+            // 
+            // _testSoundButton
+            // 
+            _testSoundButton.Location = new Point(7, 163);
+            _testSoundButton.Name = "_testSoundButton";
+            _testSoundButton.Size = new Size(107, 23);
+            _testSoundButton.TabIndex = 11;
+            _testSoundButton.Text = "Play Test Sfx";
+            _testSoundButton.UseVisualStyleBackColor = true;
+            _testSoundButton.Click += _testSoundButton_Click;
+            // 
+            // _soundOutputDeviceComboBox
+            // 
+            _soundOutputDeviceComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            _soundOutputDeviceComboBox.FormattingEnabled = true;
+            _soundOutputDeviceComboBox.Location = new Point(8, 132);
+            _soundOutputDeviceComboBox.Name = "_soundOutputDeviceComboBox";
+            _soundOutputDeviceComboBox.Size = new Size(225, 23);
+            _soundOutputDeviceComboBox.TabIndex = 10;
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(9, 111);
+            label6.Name = "label6";
+            label6.Size = new Size(86, 15);
+            label6.TabIndex = 9;
+            label6.Text = "Output Device:";
             // 
             // label10
             // 
@@ -376,7 +434,7 @@
             label10.Location = new Point(12, 52);
             label10.Name = "label10";
             label10.Size = new Size(47, 15);
-            label10.TabIndex = 31;
+            label10.TabIndex = 7;
             label10.Text = "Volume";
             // 
             // _volumeTrackBar
@@ -385,7 +443,7 @@
             _volumeTrackBar.Location = new Point(6, 73);
             _volumeTrackBar.Name = "_volumeTrackBar";
             _volumeTrackBar.Size = new Size(228, 35);
-            _volumeTrackBar.TabIndex = 6;
+            _volumeTrackBar.TabIndex = 8;
             // 
             // _soundCheckBox
             // 
@@ -393,7 +451,7 @@
             _soundCheckBox.Location = new Point(12, 25);
             _soundCheckBox.Name = "_soundCheckBox";
             _soundCheckBox.Size = new Size(128, 19);
-            _soundCheckBox.TabIndex = 5;
+            _soundCheckBox.TabIndex = 6;
             _soundCheckBox.Text = "Enable alert sounds";
             _soundCheckBox.UseVisualStyleBackColor = true;
             // 
@@ -402,27 +460,27 @@
             groupBox5.Controls.Add(_portTextBox);
             groupBox5.Controls.Add(label9);
             groupBox5.Controls.Add(_hostServerCheckBox);
-            groupBox5.Location = new Point(8, 229);
+            groupBox5.Location = new Point(254, 6);
             groupBox5.Name = "groupBox5";
-            groupBox5.Size = new Size(240, 98);
-            groupBox5.TabIndex = 27;
+            groupBox5.Size = new Size(240, 90);
+            groupBox5.TabIndex = 12;
             groupBox5.TabStop = false;
             groupBox5.Text = "Server Hosting";
             // 
             // _portTextBox
             // 
-            _portTextBox.Location = new Point(50, 59);
+            _portTextBox.Location = new Point(50, 55);
             _portTextBox.Name = "_portTextBox";
             _portTextBox.Size = new Size(61, 23);
-            _portTextBox.TabIndex = 29;
+            _portTextBox.TabIndex = 15;
             // 
             // label9
             // 
             label9.AutoSize = true;
-            label9.Location = new Point(12, 62);
+            label9.Location = new Point(12, 58);
             label9.Name = "label9";
             label9.Size = new Size(32, 15);
-            label9.TabIndex = 27;
+            label9.TabIndex = 14;
             label9.Text = "Port:";
             // 
             // _hostServerCheckBox
@@ -431,7 +489,7 @@
             _hostServerCheckBox.Location = new Point(12, 28);
             _hostServerCheckBox.Name = "_hostServerCheckBox";
             _hostServerCheckBox.Size = new Size(184, 19);
-            _hostServerCheckBox.TabIndex = 28;
+            _hostServerCheckBox.TabIndex = 13;
             _hostServerCheckBox.Text = "Host a bingo server on launch";
             _hostServerCheckBox.UseVisualStyleBackColor = true;
             // 
@@ -460,6 +518,7 @@
             Name = "SettingsDialog";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Settings";
+            Load += SettingsDialog_Load;
             panel1.ResumeLayout(false);
             tabPage2.ResumeLayout(false);
             groupBox1.ResumeLayout(false);
@@ -470,6 +529,8 @@
             groupBox7.ResumeLayout(false);
             groupBox7.PerformLayout();
             tabPage1.ResumeLayout(false);
+            groupBox4.ResumeLayout(false);
+            groupBox4.PerformLayout();
             groupBox3.ResumeLayout(false);
             groupBox3.PerformLayout();
             groupBox8.ResumeLayout(false);
@@ -520,5 +581,10 @@
         private Panel panel2;
         private Label label2;
         private TextBox _delayMatchEventsTextBox;
+        private GroupBox groupBox4;
+        private CheckBox _checkUpdatesCheckBox;
+        private Button _testSoundButton;
+        private ComboBox _soundOutputDeviceComboBox;
+        private Label label6;
     }
 }

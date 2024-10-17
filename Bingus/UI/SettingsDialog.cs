@@ -1,4 +1,6 @@
-﻿namespace Bingus.UI
+﻿using Bingus.Sfx;
+
+namespace Bingus.UI
 {
     public partial class SettingsDialog : Form
     {
@@ -84,6 +86,8 @@
 
             _delayMatchEventsTextBox.Text = Properties.Settings.Default.DelayMatchEvents.ToString();
 
+            _checkUpdatesCheckBox.Checked = Properties.Settings.Default.CheckForUpdates;
+
             updateMaxSizeEnable();
             updateOutOfFocusText();
         }
@@ -104,7 +108,7 @@
             if (!int.TryParse(_bingoMaxYTextBox.Text, out var y))
             {
                 //Invalid y size
-                return false; 
+                return false;
             }
             if (!int.TryParse(_portTextBox.Text, out int port))
             {
@@ -128,11 +132,12 @@
 
             Properties.Settings.Default.Port = port;
             Properties.Settings.Default.HostServerOnLaunch = _hostServerCheckBox.Checked;
-            
+
             Properties.Settings.Default.ClickIncrementsCountedSquares = _clickIncrementsCountCheckbox.Checked;
 
             Properties.Settings.Default.PlaySounds = _soundCheckBox.Checked;
             Properties.Settings.Default.SoundVolume = Math.Clamp(_volumeTrackBar.Value * 10, 0, 100);
+            Properties.Settings.Default.OutputDevice = (_soundOutputDeviceComboBox.SelectedItem as AudioDevice)?.Id ?? string.Empty;
 
             Properties.Settings.Default.ClickHotkey = (int)_outOfFocusKey;
 
@@ -140,8 +145,15 @@
 
             Properties.Settings.Default.DelayMatchEvents = delayMatchEvents;
 
+            Properties.Settings.Default.CheckForUpdates = _checkUpdatesCheckBox.Checked;
+
             Properties.Settings.Default.Save();
             return true;
+        }
+
+        private void SettingsDialog_Load(object sender, EventArgs e)
+        {
+            initOutputDeviceComboBox();
         }
 
         private void _outOfFocusClickTextBox_Enter(object sender, EventArgs e)
@@ -167,6 +179,26 @@
             }
         }
 
+        private void initOutputDeviceComboBox()
+        {
+            var devices = MainForm.Instance?.SoundPlayer?.GetAudioDevices() ?? null;
+            _soundOutputDeviceComboBox.DataSource = devices;
+            _soundOutputDeviceComboBox.SelectedIndex = indexOfDevice(devices, Properties.Settings.Default.OutputDevice);
+        }
+
+        private int indexOfDevice(IList<AudioDevice>? devices, string id)
+        {
+            if (devices == null)
+                return 0;
+            for (int i = 0; i < devices.Count; i++)
+            {
+                if (devices[i].Id == id)
+                    return i;
+            }
+            return 0;
+        }
+
+
         private void updateOutOfFocusText()
         {
             if (_rebindingKey)
@@ -179,6 +211,20 @@
             }
         }
 
-
+        private void _testSoundButton_Click(object sender, EventArgs e)
+        {
+            var player = MainForm.Instance?.SoundPlayer;
+            if (player != null)
+            {
+                var prev = Properties.Settings.Default.OutputDevice;
+                var selected = _soundOutputDeviceComboBox.SelectedItem as AudioDevice;
+                if (selected != null)
+                {
+                    player.SetAudioDevice(selected.Id);
+                    player.PlaySound(SoundType.SquareClaimedOther, Math.Clamp(_volumeTrackBar.Value * 10, 0, 100));
+                }
+                player.SetAudioDevice(prev);
+            }
+        }
     }
 }

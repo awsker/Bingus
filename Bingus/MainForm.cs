@@ -6,20 +6,23 @@ using Bingus.UI;
 using Bingus.Util;
 using BingusServer;
 using Neto.Shared;
+using System.Diagnostics;
+using System.Reflection;
 using System.Security.Principal;
 
 namespace Bingus
 {
     public partial class MainForm : Form
     {
+        private static object _connectLock = new object();
         private readonly Client _client;
         private Server? _server = null;
         private string _lastRoom = string.Empty;
         private string _lastAdminPass = string.Empty;
         private SoundLibrary _sounds;
         private bool _autoReconnect;
-        private static object _connectLock = new object();
         private bool _connecting = false;
+        private bool _hasCheckedUpdates;
 
         private RawInputHandler _rawInput;
 
@@ -59,7 +62,12 @@ namespace Bingus
         }
 
         public static MainForm? Instance { get; private set; }
+
         public RawInputHandler RawInput => _rawInput;
+
+        public SoundLibrary SoundPlayer => _sounds;
+
+        private bool FormReady => !Disposing && !IsDisposed && IsHandleCreated;
 
         public static Font GetFontFromSettings(Font defaultFont, float size, float defaultSize = 12f)
         {
@@ -75,7 +83,7 @@ namespace Bingus
                     if (font.Name == ffName)
                         return font;
                 }
-                catch(ArgumentException)
+                catch (ArgumentException)
                 {
                     //Font was not found
                 }
@@ -212,7 +220,7 @@ namespace Bingus
             {
                 _connecting = false;
                 _autoReconnect = false;
-                if(_client?.IsConnected == true)
+                if (_client?.IsConnected == true)
                     await _client.Disconnect();
                 updateButtonAvailability();
             }
@@ -282,8 +290,6 @@ namespace Bingus
             updateButtonAvailability();
         }
 
-        private bool FormReady => !Disposing && !IsDisposed && IsHandleCreated;
-
         private async void client_Disconnected(object? sender, StringEventArgs e)
         {
             if (!FormReady)
@@ -295,7 +301,7 @@ namespace Bingus
             if (_autoReconnect && !string.IsNullOrWhiteSpace(Properties.Settings.Default.ServerAddress))
             {
                 await connect(Properties.Settings.Default.ServerAddress, Properties.Settings.Default.Port);
-            } 
+            }
         }
 
         private void client_Kicked(object? sender, StringEventArgs e)
@@ -319,7 +325,10 @@ namespace Bingus
         {
             if (Properties.Settings.Default.PlaySounds && userCheckedSquareArgs.TeamChecked.HasValue)
             {
-                _sounds.PlaySound(SoundType.SquareClaimed);
+                if (userCheckedSquareArgs.TeamChecked.HasValue && userCheckedSquareArgs.TeamChecked.Value == _client?.LocalUser?.Team)
+                    _sounds.PlaySound(SoundType.SquareClaimedOwn);
+                else
+                    _sounds.PlaySound(SoundType.SquareClaimedOther);
             }
         }
 
@@ -447,6 +456,12 @@ namespace Bingus
             {
                 _client.PacketDelayMs = Properties.Settings.Default.DelayMatchEvents;
             }
+            if (e.PropertyName == nameof(Properties.Settings.Default.CheckForUpdates))
+            {
+                //If user just enabled "check for updates", do a little check
+                if (!_hasCheckedUpdates && Properties.Settings.Default.CheckForUpdates)
+                    checkForUpdates();
+            }
         }
 
         private void hostServer()
@@ -518,6 +533,11 @@ namespace Bingus
                 await connect(Properties.Settings.Default.ServerAddress, Properties.Settings.Default.Port);
             }
             TopMost = Properties.Settings.Default.AlwaysOnTop;
+
+            if (Properties.Settings.Default.CheckForUpdates)
+            {
+                checkForUpdates();
+            }
         }
 
         private void _lobbyControl_HandleCreated(object? sender, EventArgs e)
@@ -557,6 +577,26 @@ namespace Bingus
             _consoleControl.PrintToConsole(e.Message, Color.Red);
         }
 
+        private async void checkForUpdates()
+        {
+            _hasCheckedUpdates = true;
+            var v = Assembly.GetExecutingAssembly().GetName().Version;
+            var updater = new GitHubVersionChecker(v);
+            var newerVersion = await updater.CheckForNewerVersionAsync();
+            if (newerVersion.HasValue)
+            {
+                if (MessageBox.Show($"Version {newerVersion.Value.Tag_Name} of Bingus is now available! Open download page?", $"{Application.ProductName} - Update Available", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    openBrowser(newerVersion.Value.Html_Url);
+                }
+            }
+        }
+
+        private void openBrowser(string url)
+        {
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        }
+
         private void updateButtonAvailability()
         {
             if (!FormReady)
@@ -567,7 +607,7 @@ namespace Bingus
                 var connectingOrConnected = _connecting || connected;
                 _connectButton.Visible = !connectingOrConnected;
                 _disconnectButton.Visible = connectingOrConnected;
-                
+
                 bool inRoom = _client?.Room != null;
                 _createLobbyButton.Visible = !inRoom;
                 _joinLobbyButton.Visible = !inRoom;
