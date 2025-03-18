@@ -17,6 +17,18 @@
     <Setting Name="ControlBackColor" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">20, 20, 30</Value>
     </Setting>
+    <Setting Name="MapWindowX" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="MapWindowY" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="MapWindowWidth" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="MapWindowHeight" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
     <Setting Name="LastBingoFile" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
@@ -29,6 +41,12 @@
     <Setting Name="BingoMaxSizeY" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
+    <Setting Name="MapWindowCustomPosition" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="MapWindowCustomSize" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
     <Setting Name="BingoBoardMaximumSize" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
@@ -36,6 +54,12 @@
       <Value Profile="(Default)">-1</Value>
     </Setting>
     <Setting Name="MainWindowSizeY" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-1</Value>
+    </Setting>
+    <Setting Name="MapWindowLastWidth" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-1</Value>
+    </Setting>
+    <Setting Name="MapWindowLastHeight" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">-1</Value>
     </Setting>
     <Setting Name="BingoFont" Type="System.String" Scope="User">
@@ -48,6 +72,9 @@
       <Value Profile="(Default)">12</Value>
     </Setting>
     <Setting Name="HostServerOnLaunch" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="FlipMouseButtons" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="GS_RandomizeClasses" Type="System.Boolean" Scope="User">
@@ -65,7 +92,7 @@
     <Setting Name="GS_RandomSeed" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="ClickIncrementsCountedSquares" Type="System.Boolean" Scope="User">
+    <Setting Name="ShowClassesOnMap" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="GS_PreparationTime" Type="System.Int32" Scope="User">
@@ -105,6 +132,27 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="CheckForUpdates" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="MainWindowPositionX" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-9999</Value>
+    </Setting>
+    <Setting Name="MainWindowPositionY" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-9999</Value>
+    </Setting>
+    <Setting Name="MainWindowMaximized" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="GS_Lockout" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="SquareShadows" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">40</Value>
+    </Setting>
+    <Setting Name="MarkHighlight" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="BingoHighlight" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>

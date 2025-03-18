@@ -24,13 +24,13 @@ namespace Bingus
                 save = true;
             }
             const int idTokenLength = 10;
-
+            
             if (Properties.Settings.Default.IdentityToken.Length != idTokenLength)
             {
                 Properties.Settings.Default.IdentityToken = IdentityToken.GenerateIdentityToken(idTokenLength);
                 save = true;
             }
-            if (save)
+            if(save)
             {
                 Properties.Settings.Default.Save();
             }

@@ -41,6 +41,7 @@
             label6 = new Label();
             _boardSizeComboBox = new ComboBox();
             panel1 = new Panel();
+            _lockoutCheckBox = new CheckBox();
             panel2 = new Panel();
             panel3 = new Panel();
             panel4 = new Panel();
@@ -71,16 +72,16 @@
             label2.Location = new Point(4, 4);
             label2.Name = "label2";
             label2.Size = new Size(169, 15);
-            label2.TabIndex = 15;
+            label2.TabIndex = 19;
             label2.Text = "Max squares in same category:";
             // 
             // _maxCategoryUpDown
             // 
-            _maxCategoryUpDown.Location = new Point(186, 2);
+            _maxCategoryUpDown.Location = new Point(192, 2);
             _maxCategoryUpDown.Maximum = new decimal(new int[] { 25, 0, 0, 0 });
             _maxCategoryUpDown.Name = "_maxCategoryUpDown";
-            _maxCategoryUpDown.Size = new Size(48, 23);
-            _maxCategoryUpDown.TabIndex = 16;
+            _maxCategoryUpDown.Size = new Size(56, 23);
+            _maxCategoryUpDown.TabIndex = 20;
             // 
             // _randomSeedUpDown
             // 
@@ -88,7 +89,7 @@
             _randomSeedUpDown.Maximum = new decimal(new int[] { int.MaxValue, 0, 0, 0 });
             _randomSeedUpDown.Minimum = new decimal(new int[] { int.MinValue, 0, 0, int.MinValue });
             _randomSeedUpDown.Name = "_randomSeedUpDown";
-            _randomSeedUpDown.Size = new Size(81, 23);
+            _randomSeedUpDown.Size = new Size(87, 23);
             _randomSeedUpDown.TabIndex = 5;
             // 
             // label3
@@ -105,13 +106,13 @@
             _preparationTimeUpDown.Location = new Point(114, 2);
             _preparationTimeUpDown.Maximum = new decimal(new int[] { int.MaxValue, 0, 0, 0 });
             _preparationTimeUpDown.Name = "_preparationTimeUpDown";
-            _preparationTimeUpDown.Size = new Size(66, 23);
+            _preparationTimeUpDown.Size = new Size(72, 23);
             _preparationTimeUpDown.TabIndex = 9;
             // 
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(185, 4);
+            label4.Location = new Point(192, 4);
             label4.Name = "label4";
             label4.Size = new Size(50, 15);
             label4.TabIndex = 10;
@@ -119,7 +120,7 @@
             // 
             // button1
             // 
-            button1.Location = new Point(185, 1);
+            button1.Location = new Point(192, 1);
             button1.Name = "button1";
             button1.Size = new Size(51, 23);
             button1.TabIndex = 6;
@@ -157,7 +158,6 @@
             // 
             _boardSizeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             _boardSizeComboBox.FormattingEnabled = true;
-            _boardSizeComboBox.Items.AddRange(new object[] { "3x3", "4x4", "5x5", "6x6", "7x7", "8x8" });
             _boardSizeComboBox.Location = new Point(73, 1);
             _boardSizeComboBox.MaxDropDownItems = 6;
             _boardSizeComboBox.Name = "_boardSizeComboBox";
@@ -166,13 +166,24 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(_lockoutCheckBox);
             panel1.Controls.Add(label6);
             panel1.Controls.Add(_boardSizeComboBox);
             panel1.Dock = DockStyle.Top;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(239, 30);
+            panel1.Size = new Size(256, 30);
             panel1.TabIndex = 0;
+            // 
+            // _lockoutCheckBox
+            // 
+            _lockoutCheckBox.AutoSize = true;
+            _lockoutCheckBox.Location = new Point(180, 3);
+            _lockoutCheckBox.Name = "_lockoutCheckBox";
+            _lockoutCheckBox.Size = new Size(69, 19);
+            _lockoutCheckBox.TabIndex = 19;
+            _lockoutCheckBox.Text = "Lockout";
+            _lockoutCheckBox.UseVisualStyleBackColor = true;
             // 
             // panel2
             // 
@@ -182,7 +193,7 @@
             panel2.Dock = DockStyle.Top;
             panel2.Location = new Point(0, 30);
             panel2.Name = "panel2";
-            panel2.Size = new Size(239, 30);
+            panel2.Size = new Size(256, 30);
             panel2.TabIndex = 3;
             // 
             // panel3
@@ -193,7 +204,7 @@
             panel3.Dock = DockStyle.Top;
             panel3.Location = new Point(0, 60);
             panel3.Name = "panel3";
-            panel3.Size = new Size(239, 30);
+            panel3.Size = new Size(256, 30);
             panel3.TabIndex = 7;
             // 
             // panel4
@@ -203,7 +214,7 @@
             panel4.Dock = DockStyle.Top;
             panel4.Location = new Point(0, 90);
             panel4.Name = "panel4";
-            panel4.Size = new Size(239, 30);
+            panel4.Size = new Size(256, 30);
             panel4.TabIndex = 11;
             // 
             // panel6
@@ -213,8 +224,8 @@
             panel6.Dock = DockStyle.Top;
             panel6.Location = new Point(0, 120);
             panel6.Name = "panel6";
-            panel6.Size = new Size(239, 30);
-            panel6.TabIndex = 14;
+            panel6.Size = new Size(256, 30);
+            panel6.TabIndex = 18;
             // 
             // GameSettingsControl
             // 
@@ -226,7 +237,7 @@
             Controls.Add(panel2);
             Controls.Add(panel1);
             Name = "GameSettingsControl";
-            Size = new Size(239, 151);
+            Size = new Size(256, 149);
             ((System.ComponentModel.ISupportInitialize)_maxCategoryUpDown).EndInit();
             ((System.ComponentModel.ISupportInitialize)_randomSeedUpDown).EndInit();
             ((System.ComponentModel.ISupportInitialize)_preparationTimeUpDown).EndInit();
@@ -263,5 +274,6 @@
         private Panel panel3;
         private Panel panel4;
         private Panel panel6;
+        private CheckBox _lockoutCheckBox;
     }
 }

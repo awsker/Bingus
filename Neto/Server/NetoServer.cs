@@ -328,9 +328,9 @@ namespace Neto.Server
             }
         }
 
-        private bool clientAlreadyExists(CM client)
+        private bool clientAlreadyExists(Guid potentialGuid)
         {
-            return _clients.TryGetValue(client.ClientGuid, out var prevClient) && prevClient != client;
+            return _clients.TryGetValue(potentialGuid, out var _);
         }
 
         private string clientToken(TcpClient client, string token)

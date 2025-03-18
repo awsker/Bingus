@@ -3,7 +3,7 @@ using BingusServer;
 using InteractiveReadLine;
 using Neto.Shared;
 
-namespace BingusStandAloneServer
+namespace BingusServerStandalone
 {
     internal static class Program
     {
@@ -187,8 +187,7 @@ namespace BingusStandAloneServer
                     }
                     text += $" ({len:0.##} {sizes[order]})";
                 }
-            }
-            catch (Exception) { }
+            } catch(Exception) {}
             output(text, DefaultColor);
         }
 

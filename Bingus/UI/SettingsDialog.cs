@@ -9,9 +9,16 @@ namespace Bingus.UI
         private Keys _outOfFocusKey;
         private bool _rebindingKey = false;
 
+        private string _volumeLabelInitial;
+        private string _shadowLabelInitial;
+
         public SettingsDialog()
         {
             InitializeComponent();
+
+            _volumeLabelInitial = _volumeLabel.Text;
+            _shadowLabelInitial = _shadowLabel.Text;
+
             initControls();
         }
 
@@ -69,6 +76,11 @@ namespace Bingus.UI
             _fontLinkLabel.Font = MainForm.GetFontFromSettings(_fontLinkLabel.Font, fontSize);
             _fontLinkLabel.Text = _fontLinkLabel.Font.FontFamily.Name;
 
+            _shadowTrackBar.Value = Properties.Settings.Default.SquareShadows / 10;
+            _shadowTrackBar.ValueChanged += (o, e) => updateShadowText();
+            _highlightMarkedCheckBox.Checked = Properties.Settings.Default.MarkHighlight;
+            _highlightBingoCheckBox.Checked = Properties.Settings.Default.BingoHighlight;
+
             _outOfFocusKey = (Keys)Properties.Settings.Default.ClickHotkey;
 
             _hostServerCheckBox.Checked = Properties.Settings.Default.HostServerOnLaunch;
@@ -76,10 +88,10 @@ namespace Bingus.UI
 
             _bingoCustomMaxSizeRadioButton.CheckedChanged += (_, _) => updateMaxSizeEnable();
 
-            _clickIncrementsCountCheckbox.Checked = Properties.Settings.Default.ClickIncrementsCountedSquares;
 
             _soundCheckBox.Checked = Properties.Settings.Default.PlaySounds;
-            _volumeTrackBar.Value = Convert.ToInt32(Properties.Settings.Default.SoundVolume / 10f);
+            _volumeTrackBar.Value = Properties.Settings.Default.SoundVolume / 10;
+            _volumeTrackBar.ValueChanged += (o, e) => updateVolumeText();
 
             _colorPanel.BackColor = Properties.Settings.Default.ControlBackColor;
             _alwaysOnTopCheckbox.Checked = Properties.Settings.Default.AlwaysOnTop;
@@ -100,12 +112,12 @@ namespace Bingus.UI
 
         private bool saveSettings()
         {
-            if (!int.TryParse(_bingoMaxXTextBox.Text, out var x))
+            if (!int.TryParse(_bingoMaxXTextBox.Text, out var bingoMaxWidth))
             {
                 //Invalid x size
                 return false;
             }
-            if (!int.TryParse(_bingoMaxYTextBox.Text, out var y))
+            if (!int.TryParse(_bingoMaxYTextBox.Text, out var bingoMaxHeight))
             {
                 //Invalid y size
                 return false;
@@ -121,8 +133,8 @@ namespace Bingus.UI
                 return false;
             }
             Properties.Settings.Default.BingoBoardMaximumSize = _bingoCustomMaxSizeRadioButton.Checked;
-            Properties.Settings.Default.BingoMaxSizeX = x;
-            Properties.Settings.Default.BingoMaxSizeY = y;
+            Properties.Settings.Default.BingoMaxSizeX = bingoMaxWidth;
+            Properties.Settings.Default.BingoMaxSizeY = bingoMaxHeight;
 
             Properties.Settings.Default.ControlBackColor = _colorPanel.BackColor;
 
@@ -133,12 +145,14 @@ namespace Bingus.UI
             Properties.Settings.Default.Port = port;
             Properties.Settings.Default.HostServerOnLaunch = _hostServerCheckBox.Checked;
 
-            Properties.Settings.Default.ClickIncrementsCountedSquares = _clickIncrementsCountCheckbox.Checked;
 
             Properties.Settings.Default.PlaySounds = _soundCheckBox.Checked;
             Properties.Settings.Default.SoundVolume = Math.Clamp(_volumeTrackBar.Value * 10, 0, 100);
             Properties.Settings.Default.OutputDevice = (_soundOutputDeviceComboBox.SelectedItem as AudioDevice)?.Id ?? string.Empty;
 
+            Properties.Settings.Default.SquareShadows = Math.Clamp(_shadowTrackBar.Value * 10, 0, 100);
+            Properties.Settings.Default.MarkHighlight = _highlightMarkedCheckBox.Checked;
+            Properties.Settings.Default.BingoHighlight = _highlightBingoCheckBox.Checked;
             Properties.Settings.Default.ClickHotkey = (int)_outOfFocusKey;
 
             Properties.Settings.Default.AlwaysOnTop = _alwaysOnTopCheckbox.Checked;
@@ -198,7 +212,6 @@ namespace Bingus.UI
             return 0;
         }
 
-
         private void updateOutOfFocusText()
         {
             if (_rebindingKey)
@@ -211,6 +224,21 @@ namespace Bingus.UI
             }
         }
 
+        private void updateVolumeText()
+        {
+            _volumeLabel.Text = $"{_volumeLabelInitial} {valToPercent(_volumeTrackBar.Value)}";
+        }
+
+        private void updateShadowText()
+        {
+            _shadowLabel.Text = $"{_shadowLabelInitial} {valToPercent(_shadowTrackBar.Value)}";
+        }
+
+        private string valToPercent(int val)
+        {
+            return $"({val * 10}%)";
+        }
+
         private void _testSoundButton_Click(object sender, EventArgs e)
         {
             var player = MainForm.Instance?.SoundPlayer;
@@ -218,8 +246,7 @@ namespace Bingus.UI
             {
                 var prev = Properties.Settings.Default.OutputDevice;
                 var selected = _soundOutputDeviceComboBox.SelectedItem as AudioDevice;
-                if (selected != null)
-                {
+                if (selected != null) {
                     player.SetAudioDevice(selected.Id);
                     player.PlaySound(SoundType.SquareClaimedOther, Math.Clamp(_volumeTrackBar.Value * 10, 0, 100));
                 }

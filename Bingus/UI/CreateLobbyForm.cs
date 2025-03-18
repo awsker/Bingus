@@ -174,7 +174,7 @@ namespace Bingus.UI
             if (_gameSettingsControl.Visible)
             {
                 Width = _gameSettingsControl.Location.X + _gameSettingsControl.Width + 20;
-                Height = Math.Max(Height, _gameSettingsControl.Location.Y + _gameSettingsControl.Height + 76);
+                Height = Math.Max(_initHeight, _gameSettingsControl.Location.Y + _gameSettingsControl.Height);
                 _lobbySettingsButton.Text = "Lobby Settings <<";
             }
             else

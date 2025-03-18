@@ -8,35 +8,41 @@ namespace BingusServer
     {
         public CheckStatus()
         {
-            Team = null;
+            Teams = new List<int>();
             MarkedBy = new HashSet<Guid>();
             PlayerCounters = new ConcurrentDictionary<Guid, int>();
         }
         [JsonProperty]
-        public int? Team { get; set; }
+        public List<int> Teams { get; init; }
         [JsonProperty]
         private IDictionary<Guid, int> PlayerCounters { get; init; }
         [JsonProperty]
         private ISet<Guid> MarkedBy { get; init; }
 
+        public bool IsChecked()
+        {
+            return Teams.Count > 0;
+        }
+
+        public bool IsChecked(int team)
+        {
+            return Teams.Contains(team);
+        }
+
         public bool Check(int team)
         {
-            if (team >= 0 && Team != team)
+            if (team >= 0 && !Teams.Contains(team))
             {
-                Team = team;
+                Teams.Add(team);
+                Teams.Sort();
                 return true;
             }
             return false;
         }
 
-        public bool Uncheck()
+        public bool Uncheck(int team)
         {
-            if (Team != null)
-            {
-                Team = null;
-                return true;
-            }
-            return false;
+            return Teams.Remove(team);
         }
 
         public bool Mark(UserInRoom player)
@@ -67,7 +73,7 @@ namespace BingusServer
         public int? GetCounterByTeam(int team, IEnumerable<UserInRoom> players)
         {
             int? counter = null;
-            foreach (var player in players.Where(p => p.Team == team))
+            foreach(var player in players.Where(p => p.Team == team))
             {
                 var c = GetCounter(player);
                 if (c.HasValue)
@@ -76,6 +82,11 @@ namespace BingusServer
                 }
             }
             return counter;
+        }
+
+        public bool AnyCounters()
+        {
+            return PlayerCounters.Count > 0;
         }
 
         public bool SetCounter(Guid player, int? counter)
@@ -97,11 +108,11 @@ namespace BingusServer
             {
                 var team = teams[i];
                 int? teamCount = null;
-                if (recipient.IsSpectator)
+                if(recipient.IsSpectator)
                 {
                     teamCount = GetCounterByTeam(team.Index, players);
-                }
-                else if (recipient.Team == team.Index)
+                } 
+                else if(recipient.Team == team.Index)
                 {
                     teamCount = GetCounter(recipient);
                 }
@@ -113,7 +124,7 @@ namespace BingusServer
 
     public class ServerBingoBoard : BingoBoard
     {
-        public ServerBingoBoard(ServerRoom room, int size, BingoBoardSquare[] squares, EldenRingClasses[] availableClasses) : base(size, squares, availableClasses)
+        public ServerBingoBoard(ServerRoom room, int size, bool lockout, BingoBoardSquare[] squares, EldenRingClasses[] availableClasses) : base(size, lockout, squares, availableClasses)
         {
             var sizeSqr = size * size;
             CheckStatus = new CheckStatus[sizeSqr];
@@ -162,8 +173,7 @@ namespace BingusServer
             return new BingoBoardSquare(
                 Squares[index].Text,
                 Squares[index].Tooltip,
-                Squares[index].MaxCount,
-                status.Team,
+                status.Teams.ToArray(),
                 status.IsMarked(user),
                 status.GetCountersForPlayer(user, Room.Users, teams));
         }
@@ -178,13 +188,13 @@ namespace BingusServer
                 var oldCount = check.GetCounter(user) ?? 0;
                 if (user.IsSpectator)
                     return false;
-                var maxCount = Squares[i].MaxCount;
-                return check.SetCounter(user.Guid, maxCount > 0 ? Math.Clamp(oldCount + change, 0, maxCount) : Math.Max(0, oldCount + change));
+                return check.SetCounter(user.Guid, Math.Max(0, oldCount + change));
             }
         }
 
-        public bool UserClicked(int i, UserInRoom clicker, UserInRoom onBehalfOf)
+        public bool UserClicked(int i, UserInRoom clicker, UserInRoom onBehalfOf, out int teamChanged)
         {
+            teamChanged = -1;
             if (i < 0 || i >= SquareCount)
                 return false;
 
@@ -200,21 +210,24 @@ namespace BingusServer
             lock (check)
             {
                 bool checkChanged = false;
-                //Square not owned by any player or team, allow check
-                if (check.Team == null)
-                {
-                    if (!onBehalfOf.IsSpectator)
-                        checkChanged = check.Check(onBehalfOf.Team);
-                }
-                //Allow admin spectators to uncheck squares
-                else if (clicker.IsSpectator && clicker.IsAdmin)
-                {
-                    checkChanged = CheckStatus[i].Uncheck();
-                }
                 //Square owned by this player's team -> allow it to be toggled off
-                else if (check.Team.Value == onBehalfOf.Team)
+                if (check.IsChecked(onBehalfOf.Team))
                 {
-                    checkChanged = CheckStatus[i].Uncheck();
+                    checkChanged = check.Uncheck(onBehalfOf.Team);
+                    teamChanged = onBehalfOf.Team;
+                }
+                //Allow admin spectators to uncheck squares with only 1 check without specifying the team
+                else if (clicker.IsSpectator && clicker.IsAdmin && check.Teams.Count == 1)
+                {
+                    var team = check.Teams[0];
+                    checkChanged = CheckStatus[i].Uncheck(team);
+                    teamChanged = team;
+                }
+                //Otherwise check the square for the selected team if it's not spectator, and square is not already checked by another team
+                else if (!onBehalfOf.IsSpectator && !(Lockout && check.IsChecked()))
+                {
+                    checkChanged = check.Check(onBehalfOf.Team);
+                    teamChanged = onBehalfOf.Team;
                 }
                 if (checkChanged)
                 {
@@ -249,19 +262,15 @@ namespace BingusServer
         public Dictionary<int, int> GetSquaresPerTeam()
         {
             var squaresCountPerTeam = new Dictionary<int, int>();
-
+            
             foreach (var square in CheckStatus)
             {
-                if (!square.Team.HasValue)
-                    continue;
-
-                if (squaresCountPerTeam.TryGetValue(square.Team.Value, out int c))
+                foreach (var t in square.Teams)
                 {
-                    squaresCountPerTeam[square.Team.Value] = c + 1;
-                }
-                else
-                {
-                    squaresCountPerTeam[square.Team.Value] = 1;
+                    if (squaresCountPerTeam.TryGetValue(t, out int c))
+                        squaresCountPerTeam[t] = c + 1;
+                    else
+                        squaresCountPerTeam[t] = 1;
                 }
             }
             return squaresCountPerTeam;
@@ -272,29 +281,34 @@ namespace BingusServer
         {
             var teamsDict = teams.ToDictionary(t => t.Index, t => t);
             var bingosPerTeam = new Dictionary<int, IList<BingoLine>>();
-
+            
             void findBingo(int startx, int starty, int dx, int dy)
             {
                 int index(int x, int y) { return x + y * Size; }
                 int x = startx;
                 int y = starty;
-                int? team = null;
+                var squaresCountPerTeam = new Dictionary<int, int>();
                 for (int i = 0; i < Size; ++i)
                 {
                     var s = CheckStatus[index(x, y)];
-                    if (!s.Team.HasValue)
-                        return;
-                    if (team.HasValue && team.Value != s.Team.Value)
-                        return;
-                    team = s.Team.Value;
+                    foreach (var t in s.Teams)
+                    {
+                        if (squaresCountPerTeam.TryGetValue(t, out int c))
+                            squaresCountPerTeam[t] = c + 1;
+                        else
+                            squaresCountPerTeam[t] = 1;
+                    }
                     x += dx;
                     y += dy;
                 }
-                if (team.HasValue)
+                foreach(var teamCount in squaresCountPerTeam)
                 {
-                    if (!bingosPerTeam.TryGetValue(team.Value, out var list))
+                    if (teamCount.Value != Size)
+                        continue; //Skip teams that didn't fill the entire line
+
+                    if (!bingosPerTeam.TryGetValue(teamCount.Key, out var list))
                     {
-                        list = bingosPerTeam[team.Value] = new List<BingoLine>();
+                        list = bingosPerTeam[teamCount.Key] = new List<BingoLine>();
                     }
                     int bingoType = 0;
                     int lineIndex = 0;
@@ -312,7 +326,7 @@ namespace BingusServer
                         bingoType = 1;
                         lineIndex = starty;
                     }
-                    if (teamsDict.TryGetValue(team.Value, out var team2))
+                    if (teamsDict.TryGetValue(teamCount.Key, out var team2))
                     {
                         list.Add(new BingoLine(team2.Index, team2.Name, bingoType, lineIndex));
                     }
