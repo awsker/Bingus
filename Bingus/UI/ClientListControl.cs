@@ -29,6 +29,7 @@ namespace Bingus.UI
                 Client.AddListener<ServerJoinRoomAccepted>(joinRoomAccepted);
                 Client.AddListener<ServerUserJoinedRoom>(userJoined);
                 Client.AddListener<ServerUserLeftRoom>(userLeft);
+                Client.AddListener<ServerUserChangedTeam>(userChangedTeam);
             }
         }
 
@@ -66,6 +67,18 @@ namespace Bingus.UI
             if (Client?.Room != null)
                 updateUsersList(Client.Room);
         }
+
+        private void userChangedTeam(ClientModel? model, ServerUserChangedTeam teamChangedArgs)
+        {
+            if (Client?.Room != null)
+            {
+                var user = Client.Room.GetUser(teamChangedArgs.UserGuid);
+                if (user != null)
+                    user.Team = teamChangedArgs.Team;
+                updateUsersList(Client.Room);
+            }
+        }
+
 
         private void clearUsersList()
         {

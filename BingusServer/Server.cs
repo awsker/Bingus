@@ -26,12 +26,14 @@ namespace BingusServer
 
         private bool _maintenanceMode = false;
 
+        const int SerializationVersion = 2;
+
         private string? _jsonPath;
 
         public Server(int port, string? jsonPath = null) : base(port)
         {
             _rooms = new ConcurrentDictionary<string, ServerRoom>(StringComparer.OrdinalIgnoreCase);
-            //Always register the EldenBingoCommon assembly
+            //Always register the BingusCommon assembly
             RegisterAssembly(Assembly.GetAssembly(typeof(BingoBoard)));
             registerHandlers();
 
@@ -84,8 +86,9 @@ namespace BingusServer
 
         public override async Task Stop()
         {
-            await serializeServer();
-            await base.Stop();
+            serializeServer();
+            if (Hosting) 
+                await base.Stop();
         }
 
         protected override async Task DropClient(BingoClientModel client)
@@ -111,32 +114,31 @@ namespace BingusServer
             return null;
         }
 
-        private async Task serializeServer()
+        private void serializeServer()
         {
             if (string.IsNullOrWhiteSpace(_jsonPath))
                 return;
             try
             {
-                await Task.Run(() =>
+                var settings = new JsonSerializerSettings
                 {
-                    var settings = new JsonSerializerSettings
+                    ContractResolver = new DefaultContractResolver
                     {
-                        ContractResolver = new DefaultContractResolver
-                        {
-                            NamingStrategy = new CamelCaseNamingStrategy(),
-                            // Optional: You can make everything private or internal serializable
-                            SerializeCompilerGeneratedMembers = true
-                        },
-                        Formatting = Formatting.Indented,
-                        TypeNameHandling = TypeNameHandling.Auto
-                    };
-                    if (File.Exists(_jsonPath))
-                    {
-                        File.Move(_jsonPath, _jsonPath + ".old", true);
-                    }
-                    var data = new SerializableServerData(_rooms, CachedIdentities);
-                    File.WriteAllText(_jsonPath, JsonConvert.SerializeObject(data, settings));
-                });
+                        NamingStrategy = new CamelCaseNamingStrategy(),
+                        // Optional: You can make everything private or internal serializable
+                        SerializeCompilerGeneratedMembers = true
+                    },
+                    Formatting = Formatting.Indented,
+                    TypeNameHandling = TypeNameHandling.Auto
+                };
+                if (File.Exists(_jsonPath))
+                {
+                    File.Move(_jsonPath, _jsonPath + ".old", true);
+                }
+                var data = new SerializableServerData(SerializationVersion, _rooms, CachedIdentities);
+
+                var cx = JsonConvert.SerializeObject(data, settings);
+                File.WriteAllText(_jsonPath, cx);
             }
             catch (Exception e)
             {
@@ -257,6 +259,7 @@ namespace BingusServer
             AddListener<ClientSetGameSettings>(clientSetGameSettings);
             AddListener<ClientTogglePause>(clientTogglePause);
             AddListener<ClientSetTeamName>(clientSetTeamName);
+            AddListener<ClientRequestTeamChange>(clientTeamChange);
         }
 
         private async void roomNameRequested(BingoClientModel? sender, ClientRequestRoomName request)
@@ -311,7 +314,7 @@ namespace BingusServer
 
         private BingoGameSettings validateGameSettings(BingoGameSettings settings)
         {
-            settings.BoardSize = Math.Clamp(settings.BoardSize, 3, 8);
+            settings.BoardSize = Math.Clamp(settings.BoardSize, BingoConstants.BoardSizeMin, BingoConstants.BoardSizeMax);
             settings.PreparationTime = Math.Max(0, settings.PreparationTime);
             settings.NumberOfClasses = Math.Max(1, settings.NumberOfClasses);
             settings.CategoryLimit = Math.Max(0, settings.CategoryLimit);
@@ -355,7 +358,7 @@ namespace BingusServer
             else if (string.IsNullOrWhiteSpace(request.Nick))
                 deniedReason = "Invalid nickname";
             //else if (room != null && room.Users.Any(c => c.Nick == request.Nick))
-            //    deniedReason = "Nickname already in use";
+            //  deniedReason = "Nickname already in use";
             else if (room != null && !string.IsNullOrWhiteSpace(request.AdminPass) && !room.IsCorrectAdminPassword(request.AdminPass))
                 deniedReason = "Wrong admin password";
             if (deniedReason != null)
@@ -518,7 +521,7 @@ namespace BingusServer
             {
                 if (matchStatus.MatchStatus == MatchStatus.Starting)
                 {
-                    var p = new Packet(new ServerEntireBingoBoardUpdate(0, Array.Empty<BingoBoardSquare>(), Array.Empty<EldenRingClasses>()));
+                    var p = new Packet(new ServerEntireBingoBoardUpdate(0, true, Array.Empty<BingoBoardSquare>(), Array.Empty<EldenRingClasses>()));
                     //Reset the board for all players (except AdminSpectators, who already have the new board)
                     await SendPacketToClients(p, sender.Room.ClientModels.Where(c => !(c.IsAdmin && c.IsSpectator)));
                 }
@@ -549,7 +552,7 @@ namespace BingusServer
                         return;
 
                     var bingosBefore = board.BingoSet;
-                    if (board.UserClicked(tryCheck.Index, userInfo, userToSet))
+                    if (board.UserClicked(tryCheck.Index, userInfo, userToSet, out int teamChanged))
                     {
                         var tasks = new List<Task>();
                         var check = board.CheckStatus[tryCheck.Index];
@@ -559,7 +562,7 @@ namespace BingusServer
                         ServerBingoAchievedUpdate[] bingos = board.BingoSet.Except(bingosBefore).Select(b => new ServerBingoAchievedUpdate(b)).ToArray();
                         lock (check)
                         {
-                            userCheck = new ServerUserChecked(userInfo.Guid, tryCheck.Index, check.Team);
+                            userCheck = new ServerUserChecked(userInfo.Guid, tryCheck.Index, teamChanged, check.Teams.ToArray());
                             foreach (var recipient in sender.Room.Users)
                             {
                                 squareUpdate = new ServerSquareUpdate(board.GetSquareDataForUser(recipient, tryCheck.Index), tryCheck.Index);
@@ -731,12 +734,78 @@ namespace BingusServer
             }
         }
 
+        private async void clientTeamChange(BingoClientModel? sender, ClientRequestTeamChange change)
+        {
+            if (sender == null)
+                return;
+            if (!await confirm(sender, inRoom: true))
+                return;
+
+            var room = sender.Room;
+
+            var userInfo = room.GetUser(sender.ClientGuid);
+            if (userInfo == null)
+                return;
+
+            var oldTeam = userInfo.Team;
+            var newTeam = change.Team;
+            if (userInfo != null && newTeam != oldTeam)
+            {
+                userInfo.Team = newTeam;
+                //Construct a list of all users as UserInRoom and send these (we don't want to send the users as BingoClientInRoom since this type is unrecognized by the client)
+                var currentUsers = new List<UserInRoom>();
+                foreach (var user in room.Users)
+                {
+                    currentUsers.Add(new UserInRoom(user));
+                }
+                
+                var teamColorName = room.GetTeamNameIgnoreUsers(change.Team);
+
+                var teamChangePacket = new ServerUserChangedTeam(sender.ClientGuid, newTeam, teamColorName, currentUsers.ToArray());
+                var scoreboardUpdatePacket = createScoreboardUpdatePacket(room);
+
+                var tasks = new List<Task>();
+                var activeTeams = room.GetActiveTeams();
+                foreach (var recipient in room.Users)
+                {
+                    var packet = new Packet();
+                    packet.AddObject(teamChangePacket);
+                    packet.AddObject(scoreboardUpdatePacket);
+                    if (room.Match?.Board is ServerBingoBoard board)
+                    {
+                        //For spectators or the user changing team, we need to update all counter squares
+                        if (recipient.IsSpectator || recipient == userInfo)
+                        {
+                            for (int i = 0; i < board.CheckStatus.Length; ++i)
+                            {
+                                var check = board.CheckStatus[i];
+                                
+                                if (recipient.IsSpectator && check.AnyCounters() || check.GetCounter(userInfo) > 0)
+                                {
+                                    packet.AddObject(new ServerSquareUpdate(board.GetSquareDataForUser(recipient, i, activeTeams), i));
+                                }
+                            }
+                        }
+                        //If this recipient is the client that switched team, and they switched to spectator, and they are admin, and the match isn't started
+                        //Send the board to that player
+                        if (recipient == userInfo && userInfo.IsAdmin && userInfo.IsSpectator && room.Match.MatchStatus <= MatchStatus.Starting)
+                        {
+                            packet.AddObject(createEntireBoardPacket(board, userInfo));
+                        }
+                    }
+                    var task = SendPacketToClient(packet, recipient.Client);
+                    tasks.Add(task);
+                }
+                await Task.WhenAll(tasks);
+            }
+        }
+
         private ServerEntireBingoBoardUpdate createEntireBoardPacket(ServerBingoBoard? board, UserInRoom user)
         {
             if (board == null)
-                return new ServerEntireBingoBoardUpdate(0, Array.Empty<BingoBoardSquare>(), Array.Empty<EldenRingClasses>());
+                return new ServerEntireBingoBoardUpdate(0, true, Array.Empty<BingoBoardSquare>(), Array.Empty<EldenRingClasses>());
             var squareData = board.GetSquareDataForUser(user);
-            return new ServerEntireBingoBoardUpdate(board.Size, squareData, board.AvailableClasses);
+            return new ServerEntireBingoBoardUpdate(board.Size, board.Lockout, squareData, board.AvailableClasses);
         }
 
         private ServerScoreboardUpdate createScoreboardUpdatePacket(ServerRoom room)
@@ -862,7 +931,7 @@ namespace BingusServer
             if (room.Match?.Board == null || room.Match?.Board is not ServerBingoBoard board)
             {
                 //No board set, so we send an empty board
-                await sendPacketToRoom(new Packet(new ServerEntireBingoBoardUpdate(0, Array.Empty<BingoBoardSquare>(), Array.Empty<EldenRingClasses>())), room);
+                await sendPacketToRoom(new Packet(new ServerEntireBingoBoardUpdate(0, true, Array.Empty<BingoBoardSquare>(), Array.Empty<EldenRingClasses>())), room);
                 return;
             }
 

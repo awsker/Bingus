@@ -12,7 +12,7 @@ namespace Bingus.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.9.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.11.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -85,6 +85,54 @@ namespace Bingus.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int MapWindowX {
+            get {
+                return ((int)(this["MapWindowX"]));
+            }
+            set {
+                this["MapWindowX"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int MapWindowY {
+            get {
+                return ((int)(this["MapWindowY"]));
+            }
+            set {
+                this["MapWindowY"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int MapWindowWidth {
+            get {
+                return ((int)(this["MapWindowWidth"]));
+            }
+            set {
+                this["MapWindowWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int MapWindowHeight {
+            get {
+                return ((int)(this["MapWindowHeight"]));
+            }
+            set {
+                this["MapWindowHeight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string LastBingoFile {
             get {
@@ -134,6 +182,30 @@ namespace Bingus.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool MapWindowCustomPosition {
+            get {
+                return ((bool)(this["MapWindowCustomPosition"]));
+            }
+            set {
+                this["MapWindowCustomPosition"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool MapWindowCustomSize {
+            get {
+                return ((bool)(this["MapWindowCustomSize"]));
+            }
+            set {
+                this["MapWindowCustomSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool BingoBoardMaximumSize {
             get {
                 return ((bool)(this["BingoBoardMaximumSize"]));
@@ -164,6 +236,30 @@ namespace Bingus.Properties {
             }
             set {
                 this["MainWindowSizeY"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int MapWindowLastWidth {
+            get {
+                return ((int)(this["MapWindowLastWidth"]));
+            }
+            set {
+                this["MapWindowLastWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int MapWindowLastHeight {
+            get {
+                return ((int)(this["MapWindowLastHeight"]));
+            }
+            set {
+                this["MapWindowLastHeight"] = value;
             }
         }
         
@@ -212,6 +308,18 @@ namespace Bingus.Properties {
             }
             set {
                 this["HostServerOnLaunch"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool FlipMouseButtons {
+            get {
+                return ((bool)(this["FlipMouseButtons"]));
+            }
+            set {
+                this["FlipMouseButtons"] = value;
             }
         }
         
@@ -278,12 +386,12 @@ namespace Bingus.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool ClickIncrementsCountedSquares {
+        public bool ShowClassesOnMap {
             get {
-                return ((bool)(this["ClickIncrementsCountedSquares"]));
+                return ((bool)(this["ShowClassesOnMap"]));
             }
             set {
-                this["ClickIncrementsCountedSquares"] = value;
+                this["ShowClassesOnMap"] = value;
             }
         }
         
@@ -440,6 +548,90 @@ namespace Bingus.Properties {
             }
             set {
                 this["CheckForUpdates"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-9999")]
+        public int MainWindowPositionX {
+            get {
+                return ((int)(this["MainWindowPositionX"]));
+            }
+            set {
+                this["MainWindowPositionX"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-9999")]
+        public int MainWindowPositionY {
+            get {
+                return ((int)(this["MainWindowPositionY"]));
+            }
+            set {
+                this["MainWindowPositionY"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool MainWindowMaximized {
+            get {
+                return ((bool)(this["MainWindowMaximized"]));
+            }
+            set {
+                this["MainWindowMaximized"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool GS_Lockout {
+            get {
+                return ((bool)(this["GS_Lockout"]));
+            }
+            set {
+                this["GS_Lockout"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int SquareShadows {
+            get {
+                return ((int)(this["SquareShadows"]));
+            }
+            set {
+                this["SquareShadows"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool MarkHighlight {
+            get {
+                return ((bool)(this["MarkHighlight"]));
+            }
+            set {
+                this["MarkHighlight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool BingoHighlight {
+            get {
+                return ((bool)(this["BingoHighlight"]));
+            }
+            set {
+                this["BingoHighlight"] = value;
             }
         }
     }

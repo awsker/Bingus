@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!--
-    Microsoft ResX Schema 
+    Microsoft ResX Schema
 
     Version 2.0
 
@@ -48,7 +48,7 @@
     value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
     value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
@@ -190,6 +190,21 @@
         yJYWJ98AKktznd0Wrj0s38nLwwyg1UPOo4esMqVQEyDFThV6LrLK6EISxA1A02OdiYc8e4hCLFME6Ox5
         yCqjCRXfAJei59Wl7xkR4JYRZZ2Jhzx7iEKFzAVgoifKKtNVdBy5L+rpmc28+jDbzB5+AYNktixNR35H
         AAAAAElFTkSuQmCC
+</value>
+  </data>
+  <data name="_changeTeamButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAIPSURBVGhD7ZIBkoMgEAR9ep6Wn+XSwJh1AyuXQsPV2VVz
+        iCL0eFkuLi4uLsZxuz1SloV8m4flfr8HThKftADyGpWy5omXn7AAWHmbegHy3RJFO4OoRp/pCyCpsZZ2
+        AfKdEkkYENTYytQFAEmNtcQFyLklkqxAUGMr0xZATmOU/QLknBJJGBDTuJfpCiClMcrt6cXYV4AcWyJJ
+        Cy8bZZoC+qJ7seu47v8JPb9MGseTRHoLKFq/X0DySi4xrEj+iuueb6KKLajr/C5/WmFTideejcF+nrAE
+        sfJxgUhez8ewKUC454W9vMa0QVVO2/lnep4zgrSXLUC4J/GWfL0Ac21j75vn2jStbafFZp3dyxYget6S
+        VwFY5dbXmfuYA0lE2quSiPx8G+615G0ByIfwGg9syrMecdD6T3i9uy3hxYs82fBe4HlP4r3yI8j75HAu
+        8z152MqXhWfLgz2XGGmlyZACrE97mfTuAxJmvZPv4k2+9+D0bol/z96P0HufiFu6D/wt0Z6j5D1l+zGw
+        H7ElJO7kh1KOesE9ooP9PMKuUxA/Sl6U47OA4NrPJdVC7wQ5hPVwgWRtrkQlLCp8+H+AiJa8hbkt4ddL
+        +oyfD6yHEubCz0H39J7QvUYOZz1MRPKCa1sCmJ/15WskgT15u0bX5MyfTYQO38gxF/ZekClYhYQVn+WL
+        99Dz1afnz4he/HOW5QcD2HBlYX6SXQAAAABJRU5ErkJggg==
 </value>
   </data>
   <data name="_settingsButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

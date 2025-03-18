@@ -8,7 +8,6 @@ using BingusServer;
 using Neto.Shared;
 using System.Diagnostics;
 using System.Reflection;
-using System.Security.Principal;
 
 namespace Bingus
 {
@@ -22,15 +21,16 @@ namespace Bingus
         private SoundLibrary _sounds;
         private bool _autoReconnect;
         private bool _connecting = false;
-        private bool _hasCheckedUpdates;
-
         private RawInputHandler _rawInput;
+        private bool _hasCheckedUpdates;
 
         public MainForm()
         {
             InitializeComponent();
             Icon = Resources.icon;
+
             _sounds = new SoundLibrary();
+            _sounds.SetAudioDevice(Properties.Settings.Default.OutputDevice);
             _rawInput = new RawInputHandler(Handle);
 
             if (Properties.Settings.Default.MainWindowSizeX > 0 && Properties.Settings.Default.MainWindowSizeY > 0)
@@ -47,18 +47,20 @@ namespace Bingus
                 _autoReconnect = false;
                 _sounds.Dispose();
                 _client?.Disconnect();
+                Properties.Settings.Default.Save();
                 //Stop server and serialize rooms
                 if (_server != null)
                     await _server.Stop();
-                Properties.Settings.Default.Save();
-                Application.Exit();
             };
             _client = new Client();
             _client.PacketDelayMs = Properties.Settings.Default.DelayMatchEvents;
             addClientListeners(_client);
             listenToSettingsChanged();
             SizeChanged += mainForm_SizeChanged;
+            LocationChanged += mainForm_LocationChanged;
             Instance = this;
+
+            addVersionToTitle();
         }
 
         public static MainForm? Instance { get; private set; }
@@ -115,13 +117,26 @@ namespace Bingus
             base.WndProc(ref m);
         }
 
-        /// <summary>
-        /// Checks if the user has called this application as administrator.
-        /// </summary>
-        /// <returns>True if application is running as administrator.</returns>
-        private static bool IsAdministrator()
+        private void addVersionToTitle()
         {
-            return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+            var v = getCleanVersionString();
+            if (v != null)
+            {
+                Text += " " + v;
+            }
+        }
+
+        private string getCleanVersionString()
+        {
+            Version? version = Assembly.GetExecutingAssembly().GetName().Version;
+            if (version == null)
+                return string.Empty;
+
+            string v = $"v{version.Major}.{version.Minor}";
+            if (version.Build > 0)
+                v += $".{version.Build}";
+
+            return v;
         }
 
         private async void _connectButton_Click(object sender, EventArgs e)
@@ -259,6 +274,23 @@ namespace Bingus
             }
         }
 
+        private async void _changeTeamButton_Click(object sender, EventArgs e)
+        {
+            if (_client.LocalUser == null)
+                return;
+
+            var form = new ChangeTeamForm();
+            form.TopMost = true;
+
+            var teamBefore = _client.LocalUser.Team;
+            form.Team = teamBefore;
+
+            if (form.ShowDialog(this) == DialogResult.OK && form.Team != teamBefore)
+            {
+                await _client.SendPacketToServer(new Packet(new ClientRequestTeamChange(form.Team)));
+            }
+        }
+
         private void _settingsButton_Click(object sender, EventArgs e)
         {
             var settingsDialog = new SettingsDialog();
@@ -283,6 +315,11 @@ namespace Bingus
             client.AddListener<ServerUserChecked>(userCheckedSquare);
             client.AddListener<ServerBingoAchievedUpdate>(bingoAchieved);
             client.AddListener<ServerBroadcastMessage>(onServerMessage);
+        }
+
+        private void onServerMessage(ClientModel? model, ServerBroadcastMessage message)
+        {
+            _consoleControl.PrintToConsole("Server: " + message.Message, Color.Orange);
         }
 
         private void client_Connected(object? sender, EventArgs e)
@@ -323,9 +360,12 @@ namespace Bingus
 
         private void userCheckedSquare(ClientModel? _, ServerUserChecked userCheckedSquareArgs)
         {
-            if (Properties.Settings.Default.PlaySounds && userCheckedSquareArgs.TeamChecked.HasValue)
+            if (!Properties.Settings.Default.PlaySounds)
+                return;
+            //Only play sound if the team checking is now present in the square
+            if (userCheckedSquareArgs.TeamsChecked.Contains(userCheckedSquareArgs.Team))
             {
-                if (userCheckedSquareArgs.TeamChecked.HasValue && userCheckedSquareArgs.TeamChecked.Value == _client?.LocalUser?.Team)
+                if (userCheckedSquareArgs.Team == _client?.LocalUser?.Team)
                     _sounds.PlaySound(SoundType.SquareClaimedOwn);
                 else
                     _sounds.PlaySound(SoundType.SquareClaimedOther);
@@ -338,11 +378,6 @@ namespace Bingus
             {
                 _sounds.PlaySound(SoundType.Bingo);
             }
-        }
-
-        private void onServerMessage(ClientModel? model, ServerBroadcastMessage message)
-        {
-            _consoleControl.PrintToConsole("Server: " + message.Message, Color.Orange);
         }
 
         private void showLobbyTab()
@@ -407,7 +442,7 @@ namespace Bingus
                 {
                     hideLobbyTab();
                 }
-                updateStatusString();
+                _clientStatusTextBox.Text = _client.GetConnectionStatusString();
             }
             if (InvokeRequired)
             {
@@ -455,6 +490,10 @@ namespace Bingus
             if (e.PropertyName == nameof(Properties.Settings.Default.DelayMatchEvents) && _client != null)
             {
                 _client.PacketDelayMs = Properties.Settings.Default.DelayMatchEvents;
+            }
+            if (e.PropertyName == nameof(Properties.Settings.Default.OutputDevice))
+            {
+                _sounds.SetAudioDevice(Properties.Settings.Default.OutputDevice);
             }
             if (e.PropertyName == nameof(Properties.Settings.Default.CheckForUpdates))
             {
@@ -510,6 +549,16 @@ namespace Bingus
 
         private async void MainForm_Load(object sender, EventArgs e)
         {
+            if (Properties.Settings.Default.MainWindowPositionX > -99 && Properties.Settings.Default.MainWindowPositionY > -99)
+            {
+                Location = new Point(Properties.Settings.Default.MainWindowPositionX, Properties.Settings.Default.MainWindowPositionY);
+            }
+
+            if (Properties.Settings.Default.MainWindowMaximized)
+            {
+                WindowState = FormWindowState.Maximized;
+            }
+
             if (Properties.Settings.Default.HostServerOnLaunch)
             {
                 hostServer();
@@ -551,8 +600,22 @@ namespace Bingus
 
         private void mainForm_SizeChanged(object? sender, EventArgs e)
         {
-            Properties.Settings.Default.MainWindowSizeX = Width;
-            Properties.Settings.Default.MainWindowSizeY = Height;
+            Properties.Settings.Default.MainWindowMaximized = WindowState == FormWindowState.Maximized;
+            if (WindowState == FormWindowState.Normal)
+            {
+                Properties.Settings.Default.MainWindowSizeX = Width;
+                Properties.Settings.Default.MainWindowSizeY = Height;
+            }
+        }
+
+        private void mainForm_LocationChanged(object? sender, EventArgs e)
+        {
+            //We don't care to save the position when window is maximized. Only save window mode positions in normal mode
+            if (WindowState == FormWindowState.Normal)
+            {
+                Properties.Settings.Default.MainWindowPositionX = Location.X;
+                Properties.Settings.Default.MainWindowPositionY = Location.Y;
+            }
         }
 
         private void removeClientListeners(Client? client)
@@ -608,14 +671,18 @@ namespace Bingus
                 _connectButton.Visible = !connectingOrConnected;
                 _disconnectButton.Visible = connectingOrConnected;
 
+                toolStripSeparator1.Visible = !connected;
+
                 bool inRoom = _client?.Room != null;
                 _createLobbyButton.Visible = !inRoom;
                 _joinLobbyButton.Visible = !inRoom;
                 _leaveRoomButton.Visible = inRoom;
+                _changeTeamButton.Visible = inRoom;
 
                 _createLobbyButton.Enabled = connected;
                 _joinLobbyButton.Enabled = connected;
                 _leaveRoomButton.Enabled = connected;
+                _changeTeamButton.Enabled = connected;
             }));
         }
     }

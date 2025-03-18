@@ -7,6 +7,7 @@ namespace Bingus.UI
         public GameSettingsControl()
         {
             InitializeComponent();
+            fillBoardSizeList();
             _randomSeedUpDown.ValueChanged += (o, e) => SeedChanged?.Invoke();
         }
 
@@ -26,9 +27,10 @@ namespace Bingus.UI
             {
                 return new BingoGameSettings(
                     BoardSize,
-                    false, //No class restrictions (not supported)
-                    new HashSet<EldenRingClasses>(), //No class list
-                    0, //No number of random classes
+                    _lockoutCheckBox.Checked,
+                    false,
+                    new HashSet<EldenRingClasses>(),
+                    0,//Number of classes to pick
                     Convert.ToInt32(_maxCategoryUpDown.Value),//Max number of squares in the same category
                     Convert.ToInt32(_randomSeedUpDown.Value), //Random seed
                     Convert.ToInt32(_preparationTimeUpDown.Value), //Preparation time in seconds
@@ -38,11 +40,20 @@ namespace Bingus.UI
             set
             {
                 BoardSize = value.BoardSize;
+                _lockoutCheckBox.Checked = value.Lockout;
                 _maxCategoryUpDown.Value = value.CategoryLimit;
                 _randomSeedUpDown.Value = value.RandomSeed;
                 _preparationTimeUpDown.Value = value.PreparationTime;
                 _bonusPointsUpDown.Value = value.PointsPerBingoLine;
             }
+        }
+
+        private void fillBoardSizeList()
+        {
+            for(int i = BingoConstants.BoardSizeMin; i <= BingoConstants.BoardSizeMax; ++i)
+            {
+                _boardSizeComboBox.Items.Add($"{i}x{i}");
+            };
         }
 
         private void button1_Click(object sender, EventArgs e)
