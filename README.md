@@ -68,7 +68,7 @@ The settings are mostly for the convenience of a streamer, to set up the UI comp
 
 # Json Format
 The format is the same as is used by Bingo Brawlers and BingoSync but with extensions for tooltips, categories and counters.  
-![image](https://github.com/awsker/EldenBingo/assets/604653/a560d869-6954-4db7-9218-f9c40b838909)
+![image](https://github.com/user-attachments/assets/fa1ac51d-358b-46e0-9654-34d79b39aa70)
 
 Use the **tooltip** key to define a tooltip when hovering that square:  
  ![image](https://github.com/awsker/EldenBingo/assets/604653/a5f97ed4-9454-462a-bd31-8b2de1e186f7)
