@@ -1,5 +1,6 @@
 ﻿using BingusCommon;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 
 namespace BingusServer
 {
@@ -29,22 +30,37 @@ namespace BingusServer
                 int? center = square.Value<int?>("center");
 
                 var categories = new HashSet<string>();
-                
-                if(category != null)
+
+                if (category != null)
                     categories.Add(category.Trim());
 
                 var categoryArray = square.Value<JArray>("categories");
-                if(categoryArray != null)
+                if (categoryArray != null)
                 {
-                    foreach(var v in categoryArray.OfType<JValue>())
+                    foreach (var v in categoryArray.OfType<JValue>())
                     {
-                        if(v.Value is string c)
+                        if (v.Value is string c)
                         {
                             categories.Add(c.Trim());
                         }
                     }
                 }
-                _list.Add(new BingoJsonObj(name, tooltip, weight.GetValueOrDefault(1), categories.ToArray(), (CenterType)center.GetValueOrDefault(0)));
+                var tokenDict = new Dictionary<string, string[]>();
+                foreach (var textToken in getTokens(name))
+                {
+                    var tokenArray = square.Value<JArray>(textToken);
+                    if (tokenArray == null || tokenArray.Count == 0)
+                        throw new Exception($"Non-existent token '{textToken}' in '{name}'");
+                    if (!tokenDict.ContainsKey(textToken))
+                    {
+                        if (tokenArray.Any(t => t.Type != JTokenType.String))
+                        {
+                            throw new Exception($"Invalid type inside '{textToken}' in '{name}'");
+                        }
+                        tokenDict.Add(textToken, tokenArray.Select(t => t.Value<string>()).ToArray());
+                    }
+                }
+                _list.Add(new BingoJsonObj(name, tooltip, weight.GetValueOrDefault(1), categories.ToArray(), tokenDict.Count == 0 ? null : tokenDict, (CenterType)center.GetValueOrDefault(0)));
             }
         }
 
@@ -77,7 +93,7 @@ namespace BingusServer
             //var anyCenterSpecifics = squareList.Any(s => s.CenterType > CenterType.None);
             BingoJsonObj? centerSquare = null;
 
-            if(numSquares % 2 == 1)
+            if (numSquares % 2 == 1)
             {
                 for (int i = squareList.Count - 1; i >= 0; --i)
                 {
@@ -90,7 +106,7 @@ namespace BingusServer
                 }
             }
             //If center square was found, increase all its categories used by 1
-            if(centerSquare.HasValue)
+            if (centerSquare.HasValue)
             {
                 //Decrease how many squares we're looking for
                 --numSquares;
@@ -119,7 +135,7 @@ namespace BingusServer
                         }
                     }
                 }
-                if(thisSquareFailedCategoryCheck)
+                if (thisSquareFailedCategoryCheck)
                 {
                     //Try next square instead
                     continue;
@@ -142,7 +158,7 @@ namespace BingusServer
             if (anySquareFailedCategoryLimit)
                 squares = shuffleList(squares, _random).ToList();
 
-            if(centerSquare.HasValue)
+            if (centerSquare.HasValue)
             {
                 //Add center square to the middle of the board, after reshuffle
                 squares.Insert(numSquares / 2, centerSquare.Value);
@@ -164,15 +180,15 @@ namespace BingusServer
             return new ServerBingoBoard(room,
                 room.GameSettings.BoardSize,
                 room.GameSettings.Lockout,
-                squares.Select(s => 
+                squares.Select(s =>
                     new BingoBoardSquare(
-                        s.Text, 
-                        s.Tooltip, 
-                        Array.Empty<int>(), 
-                        false, 
+                        getTextWithResolvedTokens(s),
+                        s.Tooltip,
+                        Array.Empty<int>(),
+                        false,
                         Array.Empty<SquareCounter>()
                     )
-                ).ToArray(), 
+                ).ToArray(),
             classes);
         }
 
@@ -198,14 +214,38 @@ namespace BingusServer
             //TODO
         }
 
+        private IEnumerable<string> getTokens(string text)
+        {
+            return Regex.Matches(text, @"%(\w+)%").Select(m => m.Groups[1].Value);
+        }
+
+        private string getTextWithResolvedTokens(BingoJsonObj obj)
+        {
+            string text = obj.Text;
+            if (obj.Tokens != null)
+            {
+                foreach (var kv in obj.Tokens)
+                {
+                    text = text.Replace($"%{kv.Key}%", pickOneAtRandom(kv.Value));
+                }
+            }
+            return text;
+        }
+
+        private T pickOneAtRandom<T>(IList<T> items)
+        {
+            return items[_random.Next(items.Count)];
+        }
+
         private struct BingoJsonObj
         {
-            public BingoJsonObj(string text, string? tooltip = null, int weight = 1, string[]? categories = null, CenterType center = CenterType.None)
+            public BingoJsonObj(string text, string? tooltip = null, int weight = 1, string[]? categories = null, IDictionary<string, string[]>? tokens = null, CenterType center = CenterType.None)
             {
                 Text = text;
                 Tooltip = tooltip == null ? string.Empty : tooltip;
                 Weight = weight;
                 Categories = new HashSet<string>(categories ?? Array.Empty<string>());
+                Tokens = tokens;
                 CenterType = center;
             }
 
@@ -213,6 +253,7 @@ namespace BingusServer
             public string Tooltip { get; init; }
             public int Weight { get; init; }
             public ISet<string> Categories { get; init; }
+            public IDictionary<string, string[]>? Tokens { get; init; }
             public CenterType CenterType { get; init; }
 
             public override string ToString()
